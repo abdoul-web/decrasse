@@ -200,8 +200,8 @@
       const nHits = parsed.filter(Boolean).length;
       if (share(nHits) >= 0.8) {
         const pctShare = share(parsed.filter((p) => p && p.pct).length);
-        const pctHeader = /\b(taux|pourcentage|pourcent|percent|rate|marge|ratio)\b/.test(L) || String(col.label).includes('%');
-        if (pctShare >= 0.5 || (pctHeader && (pctShare > 0 || parsed.every((p) => !p || Math.abs(p.n) <= 1)))) return 'percent';
+        const pctHeader = /\b(taux|pourcentage|pourcent|percent|rate|marge|ratio|escompte|rabais|remise|discount|commission)\b/.test(L) || String(col.label).includes('%');
+        if (pctShare >= 0.3 || (pctHeader && (pctShare > 0 || parsed.every((p) => !p || Math.abs(p.n) <= 1)))) return 'percent';
         const curr = share(strs.filter((s) => /[$€£]|\b(CAD|USD|EUR)\b/i.test(s)).length);
         if (['montant', 'prix'].includes(k) || curr >= 0.2 || /\b(montant|prix|total|cout|couts|cost|price|amount|revenu|revenus|salaire|solde|budget|depense|depenses|frais|tarif)\b/.test(L) || L.includes('$')) return 'money';
         return 'number';
@@ -217,12 +217,12 @@
     email: 'Courriel normalisé', phone: 'Téléphone formaté', postal: 'Code postal formaté', bool: 'Oui / Non uniformisé',
     badNumber: 'Valeur non numérique retirée', badDate: 'Date illisible retirée',
     warnEmail: 'Courriel invalide, à vérifier', warnPhone: 'Numéro incomplet, à vérifier', warnPostal: 'Code postal invalide, à vérifier',
-    spelling: 'Orthographe uniformisée',
+    spelling: 'Orthographe uniformisée', zeros: 'Zéros initiaux rétablis',
   };
   const LOGCAT = {
     [R.spaces]: 'spaces', [R.invisible]: 'spaces', [R.missing]: 'missing', [R.number]: 'numbers', [R.money]: 'numbers', [R.percent]: 'numbers',
     [R.date]: 'dates', [R.email]: 'contacts', [R.phone]: 'contacts', [R.postal]: 'contacts', [R.bool]: 'bools',
-    [R.badNumber]: 'removed', [R.badDate]: 'removed', [R.warnEmail]: 'warn', [R.warnPhone]: 'warn', [R.warnPostal]: 'warn', [R.spelling]: 'spelling',
+    [R.badNumber]: 'removed', [R.badDate]: 'removed', [R.warnEmail]: 'warn', [R.warnPhone]: 'warn', [R.warnPostal]: 'warn', [R.spelling]: 'spelling', [R.zeros]: 'zeros',
   };
 
   const asText = (v) => (v instanceof Date ? (parseDate(v) || '') : typeof v === 'boolean' ? (v ? 'Oui' : 'Non') : String(v));
@@ -233,7 +233,7 @@
     return { v: t || null, fix: t === s ? null : noInv !== s && t === noInv.trim() ? R.invisible : R.spaces };
   }
 
-  function cleanCell(o, col) {
+  function cleanCell(o, col, dctx = col.dctx) {
     if (isBlank(o)) return { v: null };
     if (isMissingToken(o)) return { v: null, fix: R.missing };
     const raw = typeof o === 'string' ? o : null;
@@ -251,7 +251,7 @@
         return { v: n, fix };
       }
       case 'date': {
-        const d = parseDate(o, col.dctx);
+        const d = parseDate(o, dctx);
         if (!d) return { v: null, fix: R.badDate, status: 'removed' };
         return { v: d, fix: raw !== null && raw !== d ? R.date : typeof o === 'number' ? R.date : null };
       }
@@ -308,7 +308,7 @@
     ['empty', 'Lignes vides retirées', 'fix'], ['totals', 'Lignes de total retirées', 'fix'], ['spaces', 'Espaces superflus retirés', 'fix'],
     ['missing', 'Valeurs manquantes uniformisées', 'fix'], ['numbers', 'Nombres et montants convertis', 'fix'], ['dates', 'Dates converties', 'fix'],
     ['contacts', 'Courriels, téléphones et codes postaux formatés', 'fix'], ['bools', 'Oui / Non uniformisés', 'fix'],
-    ['spelling', 'Orthographe uniformisée', 'fix'], ['emptyCols', 'Colonnes vides retirées', 'fix'], ['dups', 'Doublons retirés', 'fix'],
+    ['spelling', 'Orthographe uniformisée', 'fix'], ['zeros', 'Zéros initiaux rétablis', 'fix'], ['emptyCols', 'Colonnes vides retirées', 'fix'], ['dups', 'Doublons retirés', 'fix'],
     ['removed', 'Valeurs illisibles retirées', 'bad'], ['warn', 'Valeurs à vérifier', 'warn'],
   ];
 
@@ -372,8 +372,18 @@
       col.nctx = numberContext(present);
       const dc = dateContext(present);
       col.dctx = { ...dc, serial: true, compact: col.type === 'date' };
-      if (col.type === 'date' && dc.ambiguous) notes.push(`${col.label} : les dates comme 05/01/2026 ont été lues jour/mois/année (format québécois).`);
-      if (col.type === 'date' && dc.conflict) notes.push(`${col.label} : le fichier mélange les formats jour/mois et mois/jour. Vérifiez les dates en surbrillance.`);
+      if (col.type !== 'date') continue;
+      // Le sens jour/mois se décide fichier par fichier : un export américain (MM/JJ) peut côtoyer un fichier québécois (JJ/MM).
+      col.dctxBySrc = new Map();
+      for (const src of new Set(records.map((r) => r.src))) {
+        const vals = records.filter((r) => r.src === src).map((r) => r.raw[col.key]).filter((v) => !isBlank(v));
+        const c = dateContext(vals);
+        col.dctxBySrc.set(src, { ...c, serial: true, compact: true });
+        const where = meta.inputs.length > 1 ? ` (${src})` : '';
+        if (c.conflict) notes.push(`${col.label}${where} : le fichier mélange les formats jour/mois et mois/jour. Vérifiez les dates en surbrillance.`);
+        else if (c.order === 'mdy') notes.push(`${col.label}${where} : dates lues au format américain mois/jour/année (détecté dans le fichier).`);
+        else if (c.ambiguous) notes.push(`${col.label}${where} : les dates comme 05/01/2026 ont été lues jour/mois/année (format québécois).`);
+      }
     }
     const active = columns.filter((c) => !c.exclude);
 
@@ -382,10 +392,25 @@
       rec.cells = active.map((col) => {
         if (col.source) return { v: rec.src };
         const o = rec.raw[col.key];
-        const res = cleanCell(o, col);
+        const res = cleanCell(o, col, col.dctxBySrc ? col.dctxBySrc.get(rec.src) : col.dctx);
         return { o, v: res.v, fix: res.fix || null, status: res.status || (res.fix ? 'fixed' : null) };
       });
     }
+
+    // Codes numériques : rétablit les zéros initiaux perdus par Excel (412 → 00412)
+    active.forEach((col, ci) => {
+      if (col.type !== 'text' || col.source) return;
+      const vals = records.map((r) => r.cells[ci].v).filter((v) => v != null);
+      if (vals.length < 3 || !vals.every((v) => /^\d+$/.test(v))) return;
+      const lens = new Map();
+      for (const v of vals) lens.set(v.length, (lens.get(v.length) || 0) + 1);
+      const [L, n] = [...lens].sort((a, b) => b[1] - a[1])[0];
+      if (n / vals.length < 0.7 || !vals.some((v) => v.length === L && v[0] === '0')) return;
+      for (const r of records) {
+        const cell = r.cells[ci];
+        if (cell.v != null && cell.v.length < L) { cell.v = cell.v.padStart(L, '0'); cell.fix = cell.fix ? cell.fix + ' · ' + R.zeros : R.zeros; cell.status = cell.status || 'fixed'; }
+      }
+    });
 
     // Orthographe : regroupe les variantes (casse, accents, espaces, traits d'union) d'une même valeur
     if (opt.unifySpelling) {

@@ -131,3 +131,16 @@ test('xlsx : écriture puis relecture par le lecteur maison', async () => {
   assert.deepEqual(values(back, 'Montant'), values(res, 'Montant'));
   assert.ok(sheets[0].rows[1][0] instanceof Date);
 });
+
+test('sens jour/mois décidé fichier par fichier lors d\'une fusion', () => {
+  const qc = D.io.parseCSV('Date;Montant\n05/01/2026;10\n25/01/2026;20');
+  const us = D.io.parseCSV('Date;Montant\n02/04/2026;30\n03/20/2026;40');
+  const res = E.clean([{ name: 'qc.csv', rows: qc }, { name: 'us.csv', rows: us }]);
+  assert.deepEqual(values(res, 'Date'), ['2026-01-05', '2026-01-25', '2026-02-04', '2026-03-20']);
+});
+
+test('zéros initiaux rétablis et escompte en pourcentage', () => {
+  const res = E.clean([{ name: 'x', rows: [['No client', 'Escompte'], ['00412', '5 %'], ['00418', 0.1], [412, '10%'], ['00433', '0 %']] }]);
+  assert.deepEqual(values(res, 'N° de client'), ['00412', '00418', '00412', '00433']);
+  assert.deepEqual(values(res, 'Escompte'), [0.05, 0.1, 0.1, 0]);
+});
