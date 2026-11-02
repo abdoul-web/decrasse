@@ -28,7 +28,7 @@ _headers                En-têtes de sécurité (Cloudflare Pages, Netlify)
 ## Essayer en local
 
 ```bash
-npm start        # sert le dossier sur http://localhost:5173
+npm start        # serveur de production sans dépendance (http://localhost:5173, ou $PORT)
 npm test         # 12 tests, aucune dépendance à installer
 ```
 
