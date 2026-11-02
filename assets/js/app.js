@@ -36,11 +36,24 @@
 
   /* ---------- Fichiers ---------- */
   const hasData = (sheet) => sheet.rows.some((r) => r.some((c) => c !== '' && c != null));
+  // « Toutes les feuilles » : seulement celles qui partagent la majorité de leurs colonnes avec la plus grande
+  // (un tableau croisé ou une feuille de paramètres n'est pas fusionné avec les données)
+  function dataSheets(sheets) {
+    if (sheets.length < 2) return sheets;
+    const keyed = sheets.map((s) => ({ s, keys: new Set(E.headerKeys(s.rows)) }));
+    const base = keyed.reduce((a, b) => (b.s.rows.length > a.s.rows.length ? b : a));
+    return keyed.filter(({ s, keys }) => {
+      if (s === base.s) return true;
+      const common = [...keys].filter((k) => base.keys.has(k)).length;
+      return common / Math.max(1, Math.min(keys.size, base.keys.size)) > 0.5;
+    }).map(({ s }) => s);
+  }
+
   function inputs() {
     const out = [];
     for (const f of state.files) {
       const usable = f.sheets.filter((s) => !s.hidden && hasData(s));
-      const list = f.sheet === 'all' ? usable : [f.sheets[f.sheet]].filter(Boolean);
+      const list = f.sheet === 'all' ? dataSheets(usable) : [f.sheets[f.sheet]].filter(Boolean);
       for (const s of list) out.push({ name: f.sheets.length > 1 ? `${f.name} › ${s.name}` : f.name, rows: s.rows });
     }
     return out;
@@ -123,7 +136,7 @@
       const info = r.meta.inputs.filter((x) => x.name === f.name || x.name.startsWith(f.name + ' › '));
       const rows = info.reduce((a, x) => a + x.rows, 0);
       const sel = usable.length > 1
-        ? `<select data-sheet="${f.id}" aria-label="Feuille à utiliser pour ${esc(f.name)}">${usable.map(({ s, i }) => `<option value="${i}"${f.sheet === i ? ' selected' : ''}>${esc(s.name)}</option>`).join('')}<option value="all"${f.sheet === 'all' ? ' selected' : ''}>Toutes les feuilles</option></select>`
+        ? `<select data-sheet="${f.id}" aria-label="Feuille à utiliser pour ${esc(f.name)}">${usable.map(({ s, i }) => `<option value="${i}"${f.sheet === i ? ' selected' : ''}>${esc(s.name)}</option>`).join('')}<option value="all"${f.sheet === 'all' ? ' selected' : ''}>Toutes les feuilles de données (${dataSheets(usable.map(({ s }) => s)).length})</option></select>`
         : '';
       return `<span class="chip"><span class="nm" title="${esc(f.name)}">${esc(f.name)}</span>${sel}<span class="ct">${plural(rows, 'ligne', 'lignes')}</span><button type="button" data-remove="${f.id}" aria-label="Retirer ${esc(f.name)}">×</button></span>`;
     }).join('');
@@ -135,7 +148,7 @@
     $('#kpis').innerHTML = [
       ['', nf.format(r.meta.outputRows), 'Lignes propres', `sur ${nf.format(r.meta.inputRows)} lues`],
       ['k-fix', `<span>${nf.format(r.meta.cellsFixed)}</span>`, 'Cellules corrigées', `${pct(r.meta.cellsFixed, r.meta.cellsTotal)} % du tableau`],
-      ['', nf.format(L.dups + L.empty + L.totals + L.repeatHeader), 'Lignes retirées', `${plural(L.dups, 'doublon', 'doublons')}, ${plural(L.totals, 'total', 'totaux')}, ${plural(L.empty, 'vide', 'vides')}`],
+      ['', nf.format(L.dups + L.empty + L.totals + L.repeatHeader + L.footer), 'Lignes retirées', `${plural(L.dups, 'doublon', 'doublons')}, ${plural(L.totals, 'total', 'totaux')}, ${plural(L.empty, 'vide', 'vides')}`],
       ['k-warn' + (attention ? '' : ' zero'), nf.format(attention), 'À vérifier', attention ? 'Valeurs signalées ou illisibles' : 'Aucune valeur douteuse'],
     ].map(([cls, v, label, sub]) => `<div class="kpi ${cls}"><span class="eyebrow">${label}</span><span class="v">${v}</span><span class="s">${esc(sub)}</span></div>`).join('');
   }

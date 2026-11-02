@@ -144,3 +144,27 @@ test('zéros initiaux rétablis et escompte en pourcentage', () => {
   assert.deepEqual(values(res, 'N° de client'), ['00412', '00418', '00412', '00433']);
   assert.deepEqual(values(res, 'Escompte'), [0.05, 0.1, 0.1, 0]);
 });
+
+test('forme canonique : accents, casse mixte, codes courts en majuscules', () => {
+  const res = run('Statut;Province;Catégorie\nlivre;qc;PIÈCES\nLivré;Qc;pièces\nLIVRÉ;QC;Pièces\nLivre;qc;pièces');
+  assert.deepEqual([...new Set(values(res, 'Statut'))], ['Livré']);
+  assert.deepEqual([...new Set(values(res, 'Province'))], ['QC']);
+  assert.deepEqual([...new Set(values(res, 'Catégorie'))], ['Pièces']);
+});
+
+test('quantités avec unités, notes de bas de page, en-tête sur deux lignes', () => {
+  const rows = [['Commande', '', 'Client', '', ''], ['N° commande', 'Qté', 'Nom', 'Ville', 'Montant'],
+    ['A1', '2 unités', 'Alpha', 'Laval', 10], ['A2', '1 unité', 'Bêta', 'Laval', 20], ['A3', 3, 'Gamma', 'Lévis', 30],
+    [], ['* Montants avant taxes'], ['Préparé par : Comptabilité']];
+  const res = E.clean([{ name: 'x', rows }]);
+  assert.deepEqual(res.columns.map((c) => c.label), ['N° de commande', 'Quantité', 'Client', 'Ville', 'Montant']);
+  assert.deepEqual(values(res, 'Quantité'), [2, 1, 3]);
+  assert.equal(res.rows.length, 3);
+  assert.equal(res.log.find((l) => l.id === 'footer').count, 2);
+});
+
+test('deux colonnes renommées pareil sont fusionnées', () => {
+  const res = E.clean([{ name: 'x', rows: [['Courriel', 'Email perso'], ['a@x.ca', ''], ['', 'b@y.ca']] }], {}, { 'x:email perso': { label: 'Courriel' } });
+  assert.deepEqual(res.columns.map((c) => c.label), ['Courriel']);
+  assert.deepEqual(values(res, 'Courriel'), ['a@x.ca', 'b@y.ca']);
+});

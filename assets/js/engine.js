@@ -23,7 +23,12 @@
     province: ['Province', 'province', 'prov', 'state', 'etat province'],
     code_postal: ['Code postal', 'code postal', 'cp', 'postal code', 'zip', 'zip code', 'postcode'],
     pays: ['Pays', 'pays', 'country'],
-    produit: ['Produit', 'produit', 'article', 'item', 'product', 'service', 'description', 'designation'],
+    produit: ['Produit', 'produit', 'article', 'item', 'product', 'service', 'description', 'designation', 'produit service', 'produit ou service', 'product name'],
+    no_commande: ['N° de commande', 'no commande', 'no de commande', 'numero commande', 'numero de commande', 'commande', 'order', 'order no', 'order number', 'order id', 'bon de commande', 'po'],
+    contact: ['Personne-ressource', 'personne ressource', 'contact', 'personne contact', 'contact name', 'nom du contact', 'responsable'],
+    escompte: ['Escompte', 'escompte', 'rabais', 'remise', 'discount', 'reduction'],
+    paye: ['Payé', 'paye', 'paid', 'regle', 'acquitte', 'est paye'],
+    livraison: ['Date de livraison', 'date de livraison', 'livraison', 'date livraison', 'delivery date', 'ship date', 'date d expedition'],
     categorie: ['Catégorie', 'categorie', 'category', 'famille', 'type de produit', 'product category'],
     quantite: ['Quantité', 'quantite', 'qte', 'qty', 'quantity', 'nb', 'nombre', 'unites', 'units', 'nb unites'],
     prix: ['Prix unitaire', 'prix', 'prix unitaire', 'prix u', 'unit price', 'price'],
@@ -63,6 +68,7 @@
     return { thousandsComma: dotDec > commaDec, thousandsDot: commaDec > dotDec };
   }
 
+  const UNIT_RE = /^(.*?\d)(unités?|unites?|unité|u\.?|pcs?|pièces?|pieces?|items?|kg|g|lbs?|l|ml|h|hrs?|heures?|jours?|x)$/i;
   function parseNumber(v, ctx = {}) {
     if (typeof v === 'number') return isFinite(v) ? { n: v, pct: false } : null;
     if (typeof v !== 'string') return null;
@@ -72,6 +78,7 @@
     if (/^\(.*\)$/.test(s)) { neg = true; s = s.slice(1, -1); }
     s = s.replace(/[\s  ']/g, '').replace(/^(CA\$|US\$|CAD|USD|EUR)|(CAD|USD|EUR)$/i, '').replace(/[$€£¥]/g, '');
     if (s.endsWith('%')) { pct = true; s = s.slice(0, -1); }
+    if (ctx.units) { const u = s.match(UNIT_RE); if (u) s = u[1]; }
     if (/^[-+]/.test(s)) { if (s[0] === '-') neg = !neg; s = s.slice(1); }
     else if (/\d-$/.test(s)) { neg = !neg; s = s.slice(0, -1); }
     if (!/^(\d[\d.,]*|[.,]\d+)$/.test(s)) return null;
@@ -189,13 +196,16 @@
     if ((k === 'telephone' && share(tHits) >= 0.5) || (share(tHits) >= 0.8 && share(formatted) >= 0.5 && !/montant|prix|total|quant/.test(L))) return 'phone';
 
     const bHits = present.filter((v) => typeof v === 'boolean' || (typeof v === 'string' && norm(v) in BOOL)).length;
-    if (share(bHits) >= 0.9 && new Set(present.map((v) => norm(v))).size <= 4 && present.some((v) => typeof v === 'boolean' || norm(v).length > 1)) return 'bool';
+    if (share(bHits) >= 0.9 && present.some((v) => typeof v === 'boolean' || norm(v).length > 1)) return 'bool';
 
     const idLike = ['id', 'no_client', 'no_facture', 'code_postal', 'telephone'].includes(k) || /\b(id|code|no|numero|sku|ref|reference|matricule|nas)\b/.test(L);
     const zeroLead = strs.filter((s) => /^0\d+$/.test(s.replace(/\s/g, ''))).length;
     const longDigits = strs.filter((s) => /^\d{13,}$/.test(s)).length;
     if (!idLike && !zeroLead && !longDigits) {
       const nctx = numberContext(present);
+      const pure = present.filter((v) => parseNumber(v, nctx)).length;
+      if (share(pure) >= 0.5 || k === 'quantite') nctx.units = true;
+      col.units = !!nctx.units;
       const parsed = present.map((v) => parseNumber(v, nctx));
       const nHits = parsed.filter(Boolean).length;
       if (share(nHits) >= 0.8) {
@@ -282,6 +292,24 @@
     }
   }
 
+  /* ---------- Forme canonique d'un groupe de variantes ----------
+     1. L'orthographe : la forme accentuée l'emporte sur la forme sans accents (Livré > Livre), si elle est assez présente.
+     2. La casse : une casse mixte (Pièces) l'emporte sur TOUT EN MAJUSCULES ou tout en minuscules. */
+  const accents = (s) => (s.normalize('NFD').match(/[\u0300-\u036f]/g) || []).length;
+  const mixedCase = (s) => s !== s.toUpperCase() && s !== s.toLowerCase();
+  function canonicalForm(g) {
+    const total = [...g.values()].reduce((a, b) => a + b, 0);
+    const spell = new Map();
+    for (const [v, n] of g) { const k = v.toLowerCase(); spell.set(k, (spell.get(k) || 0) + n); }
+    const sp = [...spell].filter(([, n]) => n >= Math.max(1, total * 0.1));
+    const pool = sp.length ? sp : [...spell];
+    const best = pool.sort((a, b) => accents(b[0]) - accents(a[0]) || b[1] - a[1] || a[0].localeCompare(b[0]))[0][0];
+    const forms = [...g].filter(([v]) => v.toLowerCase() === best);
+    // Codes courts (QC, ON, TPS) : majuscules ; sinon casse mixte de préférence
+    const pref = best.replace(/[^\p{L}]/gu, '').length <= 3 ? (v) => (v === v.toUpperCase() ? 1 : 0) : mixedCase;
+    return forms.sort((a, b) => (pref(b[0]) - pref(a[0])) || b[1] - a[1] || a[0].localeCompare(b[0]))[0][0];
+  }
+
   /* ---------- Structure du fichier ---------- */
   const nonBlank = (row) => row.filter((c) => !isBlank(c)).length;
   const looksLikeValue = (c) => typeof c === 'number' || c instanceof Date || parseNumber(String(c)) !== null || parseDate(String(c)) !== null;
@@ -305,7 +333,7 @@
   const DEFAULTS = { skipTitleRows: true, dropTotals: true, unifySpelling: true, dedupe: true, dropEmptyColumns: true, sortByDate: false, addSource: true };
   const LOG_DEF = [
     ['title', 'Lignes de titre ignorées', 'info'], ['headers', 'En-têtes harmonisés', 'fix'], ['repeatHeader', 'En-têtes répétés retirés', 'fix'],
-    ['empty', 'Lignes vides retirées', 'fix'], ['totals', 'Lignes de total retirées', 'fix'], ['spaces', 'Espaces superflus retirés', 'fix'],
+    ['empty', 'Lignes vides retirées', 'fix'], ['totals', 'Lignes de total retirées', 'fix'], ['footer', 'Notes de bas de page retirées', 'fix'], ['spaces', 'Espaces superflus retirés', 'fix'],
     ['missing', 'Valeurs manquantes uniformisées', 'fix'], ['numbers', 'Nombres et montants convertis', 'fix'], ['dates', 'Dates converties', 'fix'],
     ['contacts', 'Courriels, téléphones et codes postaux formatés', 'fix'], ['bools', 'Oui / Non uniformisés', 'fix'],
     ['spelling', 'Orthographe uniformisée', 'fix'], ['zeros', 'Zéros initiaux rétablis', 'fix'], ['emptyCols', 'Colonnes vides retirées', 'fix'], ['dups', 'Doublons retirés', 'fix'],
@@ -333,10 +361,18 @@
       const width = Math.max(headerRow.length, ...rows.slice(h + 1, h + 200).map((r) => r.length));
       const seen = new Map();
       const hdr = [];
+      // En-tête sur deux lignes : la ligne du dessus (cellules fusionnées) donne le groupe de chaque colonne
+      const parentRow = h > 0 && nonBlank(rows[h - 1]) > 1 && nonBlank(rows[h - 1]) < nonBlank(headerRow) ? rows[h - 1] : null;
+      let parent = '';
       for (let i = 0; i < width; i++) {
         const raw = headerRow[i] ?? '';
+        if (parentRow && !isBlank(parentRow[i])) parent = parentRow[i];
         if (isBlank(raw) && !rows.slice(h + 1).some((r) => !isBlank(r[i]))) { hdr.push(null); continue; }
         let c = canonHeader(isBlank(raw) ? '' : raw, i);
+        if (parent && ['nom', 'name', 'nom complet', 'raison sociale'].includes(headerNorm(raw))) {
+          const pc = canonHeader(parent, i);
+          if (!pc.key.startsWith('x:')) c = pc;
+        }
         const dup = seen.get(c.key) || 0;
         seen.set(c.key, dup + 1);
         if (dup) c = { key: c.key + '#' + (dup + 1), label: c.label + ' (' + (dup + 1) + ')' };
@@ -352,13 +388,33 @@
         if (!nonBlank(row)) { log.empty++; continue; }
         if (row.map((c) => norm(c ?? '')).join('|') === headerSig) { log.repeatHeader++; continue; }
         if (opt.dropTotals && isTotalRow(row)) { log.totals++; continue; }
-        const rec = { src: input.name, srcRow: r + 1, raw: {} };
+        const rec = { src: input.name, srcRow: r + 1, raw: {}, filled: nonBlank(row), firstText: typeof row.find((c) => !isBlank(c)) === 'string' };
         hdr.forEach((c, i) => { if (c) rec.raw[c.key] = row[i]; });
         records.push(rec);
         info.rows++;
       }
+      // Notes de bas de page : lignes d'une seule cellule de texte sous les données (« Préparé par… »)
+      if (hdr.filter(Boolean).length >= 4) {
+        while (records.length && records[records.length - 1].src === input.name && records[records.length - 1].filled === 1 && records[records.length - 1].firstText) {
+          records.pop(); info.rows--; log.footer++;
+        }
+      }
     }
     if (opt.addSource && meta.inputs.length > 1) columns.push({ key: '__src', label: 'Source', source: true });
+
+    // Colonnes renommées avec le même nom : elles sont fusionnées (la première valeur non vide l'emporte)
+    for (const col of columns) { const ov = overrides[col.key]; if (ov && ov.label) col.label = ov.label; }
+    const byLabel = new Map();
+    for (const col of [...columns]) {
+      if (col.source) continue;
+      const k = norm(col.label);
+      const first = byLabel.get(k);
+      if (!first) { byLabel.set(k, col); continue; }
+      for (const r of records) if (isBlank(r.raw[first.key]) && !isBlank(r.raw[col.key])) r.raw[first.key] = r.raw[col.key];
+      columns.splice(columns.indexOf(col), 1);
+      (first.merged ||= []).push(col.key);
+      notes.push(`Colonnes fusionnées sous « ${first.label} ».`);
+    }
 
     // Types et contextes
     for (const col of columns) {
@@ -369,7 +425,7 @@
       const present = records.map((r) => r.raw[col.key]).filter((v) => !isBlank(v) && !isMissingToken(v));
       col.detected = detectType(col, present);
       col.type = ov.type && TYPES.includes(ov.type) ? ov.type : col.detected === 'empty' ? 'text' : col.detected;
-      col.nctx = numberContext(present);
+      col.nctx = { ...numberContext(present), units: !!col.units };
       const dc = dateContext(present);
       col.dctx = { ...dc, serial: true, compact: col.type === 'date' };
       if (col.type !== 'date') continue;
@@ -420,9 +476,8 @@
         if (!vals.length || vals.reduce((a, v) => a + v.length, 0) / vals.length > 40) return;
         const groups = new Map();
         for (const v of vals) { const k = groupKey(v); if (!groups.has(k)) groups.set(k, new Map()); const g = groups.get(k); g.set(v, (g.get(v) || 0) + 1); }
-        const quality = (s) => (/[^\x00-\x7f]/.test(s) ? 2 : 0) + (/^\p{Lu}/u.test(s) && s !== s.toUpperCase() ? 1 : 0) + (s !== s.toUpperCase() && s !== s.toLowerCase() ? 0.5 : 0);
         const canon = new Map();
-        groups.forEach((g, k) => { if (g.size > 1) canon.set(k, [...g.entries()].sort((a, b) => b[1] - a[1] || quality(b[0]) - quality(a[0]) || a[0].localeCompare(b[0]))[0][0]); });
+        groups.forEach((g, k) => { if (g.size > 1) canon.set(k, canonicalForm(g)); });
         if (!canon.size) return;
         for (const r of records) {
           const cell = r.cells[ci];
@@ -484,7 +539,7 @@
 
     return {
       columns: outCols,
-      allColumns: columns.map(({ key, label, type, detected, exclude, source }) => ({ key, label, type, detected, exclude, source })),
+      allColumns: columns.map(({ key, label, type, detected, exclude, source, merged }) => ({ key, label, type, detected, exclude, source, merged })),
       rows: out,
       changes,
       log: LOG_DEF.map(([id, label, kind]) => ({ id, label, kind, count: log[id] })),
@@ -558,5 +613,11 @@
     return [data, corrections, report];
   }
 
-  D.engine = { clean, parseNumber, parseDate, dateContext, numberContext, detectType, canonHeader, findHeader, display, rawDisplay, toCSV, workbookSheets, TYPES, TYPE_LABEL, norm };
+  function headerKeys(rows) {
+    const h = findHeader(rows);
+    if (h < 0) return [];
+    return rows[h].filter((c) => !isBlank(c)).map((c, i) => canonHeader(c, i).key);
+  }
+
+  D.engine = { headerKeys, clean, parseNumber, parseDate, dateContext, numberContext, detectType, canonHeader, findHeader, display, rawDisplay, toCSV, workbookSheets, TYPES, TYPE_LABEL, norm };
 })(globalThis.Decrasse || (globalThis.Decrasse = {}));
