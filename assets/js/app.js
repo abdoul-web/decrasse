@@ -17,6 +17,10 @@
     ui: { tab: 'preview', search: '', filter: 'all', changeFilter: 'all', dateFormat: 'iso', csv: 'std', previewView: 'cards', cardPage: 0, ch: {} },
   };
   let seq = 0;
+  let reportController = null, reportResult = null;
+  // Le style est également embarqué dans les rapports HTML exportés.
+  const reportStyle = document.createElement('style');
+  reportStyle.id = 'decrasse-report-style'; reportStyle.textContent = D.reportUI.CSS; document.head.append(reportStyle);
 
   /* ---------- Messages ---------- */
   let toastTimer;
@@ -87,6 +91,7 @@
   }
 
   function reset() {
+    reportController?.destroy(); reportController = null; reportResult = null;
     state.files = []; state.overrides = {}; state.result = null; state.ui.ch = {};
     state.ui.cardPage = 0;
     $('#search').value = ''; state.ui.search = '';
@@ -179,9 +184,10 @@
   }
 
   /* ----- Onglets ----- */
-  const TABS = ['preview', 'changes', 'columns', 'charts'];
+  const TABS = ['preview', 'changes', 'columns', 'charts', 'report'];
   function setTab(t, focus) {
     state.ui.tab = t;
+    $('#workspace').classList.toggle('report-mode', t === 'report');
     for (const x of TABS) {
       const b = $('#tab-' + x);
       b.setAttribute('aria-selected', String(x === t));
@@ -193,7 +199,14 @@
   }
   function renderTabs() {
     if (!state.result) return;
-    ({ preview: renderPreview, changes: renderChanges, columns: renderColumns, charts: renderCharts })[state.ui.tab]();
+    ({ preview: renderPreview, changes: renderChanges, columns: renderColumns, charts: renderCharts, report: renderReport })[state.ui.tab]();
+  }
+
+  function renderReport() {
+    const data = () => D.reportEngine.fromResult(state.result, state.files.map((f) => f.name).join(' + '));
+    if (!reportController) reportController = D.reportUI.mount($('#reportApp'), data(), null, { onExport: save });
+    else if (reportResult !== state.result) reportController.update(data());
+    reportResult = state.result;
   }
 
   const cellClass = (col) => (['number', 'money', 'percent'].includes(col.type) ? 'num' : ['date', 'phone', 'postal'].includes(col.type) ? 'mono' : '');
@@ -452,6 +465,7 @@
 
   /* ---------- Événements ---------- */
   function bind() {
+    $('#openReport').addEventListener('click', () => { setTab('report', true); $('#panel-report').scrollIntoView({ behavior: 'auto', block: 'start' }); });
     $('#fileInput').addEventListener('change', (e) => { addFiles(e.target.files); e.target.value = ''; });
     $('#demoBtn').addEventListener('click', loadSample);
     $('#heroDemoBtn')?.addEventListener('click', loadSample);
