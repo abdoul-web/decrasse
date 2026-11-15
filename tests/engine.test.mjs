@@ -168,3 +168,74 @@ test('deux colonnes renommées pareil sont fusionnées', () => {
   assert.deepEqual(res.columns.map((c) => c.label), ['Courriel']);
   assert.deepEqual(values(res, 'Courriel'), ['a@x.ca', 'b@y.ca']);
 });
+
+test('horodatages : les opérations à des heures différentes restent distinctes dans les exports', async () => {
+  const text = 'Date;Client;Montant\n2026-11-13T09:00:00;Client test A;100\n2026-11-13T15:00:00;Client test A;100\n2026-11-14T09:00:00;Client test B;50\n2026-11-14T09:00:00;Client test B;50';
+  const res = run(text);
+  const expected = ['2026-11-13T09:00:00', '2026-11-13T15:00:00', '2026-11-14T09:00:00'];
+  assert.equal(res.meta.inputRows, 4);
+  assert.equal(res.rows.length, 3);
+  assert.equal(res.meta.removedRows, 1);
+  assert.deepEqual(values(res, 'Date'), expected);
+  assert.equal(values(res, 'Montant').reduce((a, b) => a + b, 0), 250);
+  const csv = D.io.parseCSV(E.toCSV(res));
+  assert.deepEqual(csv.slice(1).map((r) => r[0]), expected);
+  const sheets = await D.io.readXlsx(await D.xlsx.writeXlsx(E.workbookSheets(res)));
+  assert.deepEqual(sheets[0].rows.slice(1).map((r) => r[0]), expected);
+  assert.equal(sheets[0].rows.slice(1).reduce((n, r) => n + r[2], 0), 250);
+  assert.equal(E.display(res.columns[0], expected[0], { dateFormat: 'dmy' }), '13/11/2026 09:00:00');
+  assert.ok(E.toCSV(res, { dateFormat: 'dmy' }).includes('13/11/2026 15:00:00'));
+});
+
+test('horodatages : fractions de seconde, fuseaux, dates Excel et texte français préservés', async () => {
+  assert.equal(E.parseDate('2026-11-13T09:00:00.123456789-0500'), '2026-11-13T09:00:00.123456789-05:00');
+  assert.equal(E.parseDate('2026-11-13T00:00:00Z'), '2026-11-13T00:00:00Z');
+  assert.equal(E.parseDate('13/11/2026 9:30'), '2026-11-13T09:30:00');
+  assert.equal(E.parseDate('12 janv. 2026 9h30'), '2026-01-12T09:30:00');
+  assert.equal(E.parseDate('Jan 12, 2026 09:30:15'), '2026-01-12T09:30:15');
+  assert.equal(E.parseDate(46025.375, { serial: true }), '2026-01-03T09:00:00');
+  const date = D.io.serialToDate(46025.625, false);
+  assert.equal(E.parseDate(date), '2026-01-03T15:00:00');
+  assert.equal(E.rawDisplay(date), '2026-01-03T15:00:00');
+  const res = E.clean([{ name: 'dates.xlsx', rows: [['Date', 'Montant'], [date, 100], [46025.375, 100]] }]);
+  assert.deepEqual(values(res, 'Date'), ['2026-01-03T15:00:00', '2026-01-03T09:00:00']);
+  const zoned = run('Date;Montant\n2026-11-13T09:00:00.123456789-05:00;100\n2026-11-13T09:00:00.123456789+01:00;100');
+  assert.equal(zoned.rows.length, 2);
+  const sheets = await D.io.readXlsx(await D.xlsx.writeXlsx(E.workbookSheets(zoned)));
+  assert.deepEqual(sheets[0].rows.slice(1).map((r) => r[0]), values(zoned, 'Date'));
+});
+
+test('une heure non reconnue reste visible et signalée, sans conversion silencieuse', () => {
+  const text = 'Date;Montant\n2026-11-13T09:00:00;10\n2026-11-13T15:00:00;20\n2026-11-13T25:00:00;30';
+  const res = run(text);
+  assert.deepEqual(values(res, 'Date'), ['2026-11-13T09:00:00', '2026-11-13T15:00:00', '2026-11-13T25:00:00']);
+  assert.equal(res.log.find((l) => l.id === 'warn').count, 1);
+  assert.equal(res.rows[2].cells[0].status, 'warn');
+  assert.equal(res.rows[2].cells[0].o, '2026-11-13T25:00:00');
+});
+
+test('le tri des horodatages tient compte des décalages horaires', () => {
+  const res = run('Date;Montant\n2026-11-13T09:00:00-05:00;10\n2026-11-13T10:00:00Z;20', { sortByDate: true });
+  assert.deepEqual(values(res, 'Date'), ['2026-11-13T10:00:00Z', '2026-11-13T09:00:00-05:00']);
+});
+
+test('les compteurs réconcilient les lignes lues, retirées et conservées', () => {
+  const inputs = D.sample.map((s) => ({ name: s.name, rows: D.io.parseCSV(s.text) }));
+  for (const dedupe of [true, false]) {
+    const res = E.clean(inputs, { dedupe });
+    assert.equal(res.meta.inputRows, 29);
+    assert.equal(res.meta.candidateRows, 26);
+    assert.equal(res.meta.removedRows, dedupe ? 5 : 3);
+    assert.equal(res.meta.inputRows, res.meta.outputRows + res.meta.removedRows);
+    assert.equal(res.meta.inputs.reduce((n, i) => n + i.readRows, 0), res.meta.inputRows);
+    const report = E.workbookSheets(res)[2].rows;
+    assert.deepEqual(report.find((r) => r[0] === 'Lignes lues'), ['Lignes lues', '29']);
+    assert.deepEqual(report.find((r) => r[0] === 'Lignes retirées'), ['Lignes retirées', String(res.meta.removedRows)]);
+  }
+  const rows = [['Titre'], ['Date', 'Client', 'Ville', 'Montant'], ['2026-01-03', 'Alpha', 'Laval', 10], [], ['Date', 'Client', 'Ville', 'Montant'], ['TOTAL', '', '', 10], ['Préparé par : Test']];
+  const res = E.clean([{ name: 'structure.csv', rows }]);
+  assert.equal(res.meta.inputRows, 5);
+  assert.equal(res.meta.outputRows, 1);
+  assert.equal(res.meta.removedRows, 4);
+  assert.equal(res.meta.inputRows, res.meta.outputRows + res.meta.removedRows);
+});
