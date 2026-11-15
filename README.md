@@ -21,6 +21,8 @@ assets/js/io.js         Lecture CSV / XLSX (maison) / XLS (SheetJS, chargé au b
 assets/js/xlsx-write.js Écriture de classeurs .xlsx typés (dates, montants, filtres)
 assets/js/engine.js     Moteur de nettoyage (fonctions pures, testées)
 assets/js/sample.js     Configuration et fichiers d'exemple
+assets/js/report-engine.js Calculs, périmètres, statistiques et distribution du rapport
+assets/js/report-ui.js  Studio interactif, styles, export HTML autonome et impression
 assets/js/app.js        Interface
 tests/                  Tests du moteur et du format Excel (node --test)
 tools/build-preview.mjs Version monofichier pour une démo hors ligne
@@ -85,3 +87,38 @@ Autres options gratuites : Netlify (glisser-déposer le dossier sur app.netlify.
 Les compteurs distinguent les lignes lues sous l'en-tête, les lignes retirées et les lignes conservées :
 `lignes lues = lignes propres + lignes retirées`. Les titres avant l'en-tête sont comptés séparément dans le journal.
 La FAQ et les explications restent accessibles sous les résultats, sans effacer les fichiers chargés.
+
+
+## Décrasse Studio — Excel vers rapport interactif
+
+Après l’import et le nettoyage, **Créer un rapport** ouvre le Studio. Les indicateurs,
+la courbe temporelle, le classement des groupes, la distribution et les constats
+descriptifs utilisent toutes les lignes nettoyées sélectionnées, indépendamment de
+la pagination et des filtres de l’aperçu de nettoyage. Un clic sur un groupe filtre
+le rapport entier. La recherche et la période s’appliquent au même périmètre.
+
+- **Personnaliser** : titre, mesure, total/moyenne/nombre de lignes, dimension, date et unité.
+  Sans colonne numérique, le calcul proposé est le nombre de lignes. Une colonne
+  de pourcentages propose une moyenne simple, sans pondération.
+- **Dates** : jours calendaires du fichier ; heures et fuseaux ne changent pas
+  la date de rattachement. Les présélections utilisent la dernière date du fichier.
+  Une période absente n’est pas imputée à zéro ; une période observée peut être partielle.
+- **Valeurs absentes** : exclues des statistiques numériques, distinctes du zéro.
+  La couverture indique le nombre de valeurs retenues sur les lignes sélectionnées.
+  Aucune cause, prévision ou note de fiabilité n’est inventée.
+- **Unités** : aucune devise n’est déduite du type money. Choisir CAD/USD/EUR ne
+  convertit pas les valeurs. Il appartient à la personne de vérifier leur unité commune.
+- **Export HTML** : autonome, sans police, bibliothèque ni serveur externe. Il
+  contient toutes les données nettoyées, y compris celles masquées par les filtres ;
+  la sélection actuelle est conservée à l’ouverture et peut être effacée.
+  Les anciennes valeurs avant nettoyage et le journal détaillé ne sont pas inclus.
+- **Imprimer / PDF** : instantané de la sélection actuelle via la boîte d’impression
+  du navigateur ; les contrôles et tableaux repliables ne sont pas imprimés.
+- **Accessibilité et volume** : graphiques SVG accompagnés de tableaux ; commandes
+  clavier, champs de 44 px sur mobile, texte de saisie de 16 px. Aperçu de données
+  limité à 50 lignes, tableaux des graphiques à 500 groupes/périodes. Les calculs
+  restent globaux. Les grands fichiers restent limités par la mémoire du navigateur.
+
+Les modules n’utilisent aucune requête réseau, ne modifient pas les fichiers d’origine
+et ne nécessitent ni compte ni clé API. `npm test` vérifie les calculs, les filtres,
+les dates, les absences, les pourcentages et le script HTML exporté dans un contexte isolé.
