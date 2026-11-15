@@ -14,6 +14,8 @@ index.html              Page d'accueil et outil
 confidentialite.html    Politique de confidentialité
 404.html                Page introuvable
 assets/css/app.css      Styles (thème clair et sombre)
+assets/css/atelier.css  Identité visuelle Atelier, accueil et espace de travail adaptés aux petits écrans
+assets/js/appearance.js Préférence de thème clair/sombre
 assets/js/zip.js        Lecture et écriture ZIP (conteneur des .xlsx)
 assets/js/io.js         Lecture CSV / XLSX (maison) / XLS (SheetJS, chargé au besoin)
 assets/js/xlsx-write.js Écriture de classeurs .xlsx typés (dates, montants, filtres)
@@ -29,7 +31,7 @@ _headers                En-têtes de sécurité (Cloudflare Pages, Netlify)
 
 ```bash
 npm start        # serveur de production sans dépendance (http://localhost:5173, ou $PORT)
-npm test         # 12 tests, aucune dépendance à installer
+npm test         # tests du moteur et des exports, aucune dépendance à installer
 ```
 
 Ou, sans Node : `python3 -m http.server 5173`, puis ouvrir http://localhost:5173.
@@ -75,6 +77,11 @@ Autres options gratuites : Netlify (glisser-déposer le dossier sur app.netlify.
 2. **En-têtes** : synonymes français et anglais ramenés à un nom commun (`Qté`, `quantity` → `Quantité`), ce qui permet de fusionner des fichiers différents.
 3. **Types** : chaque colonne est classée (date, montant, nombre, pourcentage, courriel, téléphone, code postal, oui/non, texte).
    Les codes avec zéros initiaux restent du texte. Le sens JJ/MM ou MM/JJ est déduit de la colonne entière.
+   Les heures, fractions de seconde et fuseaux sont préservés avant le dédoublonnage. Dans Excel, les horodatages sont conservés en texte pour ne pas perdre leur fuseau ou leur précision ; les dates sans heure restent des cellules de date.
 4. **Cellules** : conversion selon le type ; les valeurs illisibles sont retirées et listées, les contacts douteux sont signalés sans être effacés.
 5. **Orthographe** : les variantes d'une même valeur (casse, accents, espaces, traits d'union) prennent la forme la plus fréquente.
 6. **Doublons** et **colonnes vides** retirés, puis journal complet des corrections.
+
+Les compteurs distinguent les lignes lues sous l'en-tête, les lignes retirées et les lignes conservées :
+`lignes lues = lignes propres + lignes retirées`. Les titres avant l'en-tête sont comptés séparément dans le journal.
+La FAQ et les explications restent accessibles sous les résultats, sans effacer les fichiers chargés.
