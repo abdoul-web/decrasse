@@ -22,4 +22,16 @@
     try { localStorage.setItem('decrasse-theme', preference); } catch { /* Le thème fonctionne aussi sans stockage. */ }
   });
   system.addEventListener('change', (e) => { if (!preference) apply(e.matches ? 'dark' : 'light'); });
+
+  const menu = document.querySelector('.mobile-menu');
+  if (menu) {
+    const trigger = menu.querySelector('summary');
+    menu.addEventListener('toggle', () => trigger.setAttribute('aria-label', menu.open ? 'Fermer le menu' : 'Ouvrir le menu'));
+    menu.querySelectorAll('a').forEach((link) => link.addEventListener('click', () => { menu.open = false; }));
+    document.addEventListener('click', (e) => { if (menu.open && !menu.contains(e.target)) menu.open = false; });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && menu.open) { menu.open = false; trigger.focus(); }
+    });
+    window.matchMedia('(max-width: 850px)').addEventListener('change', (e) => { if (!e.matches) menu.open = false; });
+  }
 })();

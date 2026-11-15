@@ -22,6 +22,7 @@
 <link rel="stylesheet" href="assets/css/app.css?v=20261114-2">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Décrasse","applicationCategory":"BusinessApplication","operatingSystem":"Web","inLanguage":"fr-CA","offers":{"@type":"Offer","price":"0","priceCurrency":"CAD"},"description":"Nettoyage automatique de fichiers Excel et CSV dans le navigateur."}</script>
 <link rel="stylesheet" href="assets/css/atelier.css?v=20261114-2">
+<link rel="stylesheet" href="assets/css/mobile.css?v=20261115-mobile-1">
 </head>
 <body>
 <a class="visually-hidden" href="#main">Aller au contenu</a>
@@ -29,7 +30,7 @@
   <div class="container">
     <a class="logo" href="./" aria-label="Décrasse, accueil"><svg viewBox="0 0 36 36" aria-hidden="true"><rect width="36" height="36" rx="11" fill="currentColor"/><path d="M10 11h16M10 18h16" stroke="var(--bg)" stroke-width="3" stroke-linecap="round"/><path d="M10 25h9" stroke="#D4EE67" stroke-width="3" stroke-linecap="round"/></svg><span>Décrasse<span class="logo-period">.</span></span></a>
     <nav class="site-nav" aria-label="Navigation principale"><a class="opt" href="#corrections">Ce qui change</a><a class="opt" href="#comment">Comment ça marche</a><a class="opt" href="#faq">FAQ</a></nav>
-    <div class="header-actions"><button class="theme-toggle" id="themeToggle" type="button" aria-label="Passer au thème sombre" aria-pressed="false"><svg class="theme-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M20.5 13A8.6 8.6 0 0 1 11 3.5 8.7 8.7 0 1 0 20.5 13Z"/></svg><svg class="theme-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/></svg></button><a class="btn nav-cta" href="#dropzone" data-start><span data-start-label>Faire place nette</span><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 18 18 6M6 6h12v12"/></svg></a></div>
+    <div class="header-actions"><button class="theme-toggle" id="themeToggle" type="button" aria-label="Passer au thème sombre" aria-pressed="false"><svg class="theme-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M20.5 13A8.6 8.6 0 0 1 11 3.5 8.7 8.7 0 1 0 20.5 13Z"/></svg><svg class="theme-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/></svg></button><a class="btn nav-cta" href="#dropzone" data-start><span data-start-label>Faire place nette</span><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 18 18 6M6 6h12v12"/></svg></a><details class="mobile-menu"><summary aria-label="Ouvrir le menu"><svg class="menu-bars" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><svg class="menu-close" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="m6 6 12 12M6 18 18 6"/></svg></summary><nav aria-label="Navigation mobile"><p class="eyebrow">À portée de main</p><a class="mobile-start" href="./#dropzone" data-start><span data-start-label>Nettoyer mes fichiers</span><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M6 18 18 6M6 6h12v12"/></svg></a><a href="./#corrections">Ce qui est corrigé</a><a href="./#comment">Comment ça marche</a><a href="./#faq">Questions fréquentes</a><a href="confidentialite.html">Confidentialité</a></nav></details></div>
   </div>
 </header>
 <main id="main">
@@ -40,7 +41,7 @@
           <p class="eyebrow hero-kicker"><span class="status-dot"></span> Du propre dans vos données</p>
           <h1>Le bazar,<br>c’est <em>fini.</em><span class="hero-star" aria-hidden="true">✳</span></h1>
           <p class="lede">Vos Excel et CSV, remis d’aplomb.<br>Dates, montants, doublons : Décrasse fait le ménage. Vous gardez le contrôle.</p>
-          <div class="hero-actions"><a class="btn primary big" href="#dropzone">Nettoyer mes fichiers <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 18 18 6M6 6h12v12"/></svg></a><button class="demo-link" id="heroDemoBtn" type="button"><span class="play-icon" aria-hidden="true"><svg viewBox="0 0 16 16" width="10" height="10" fill="currentColor"><path d="m5 3 8 5-8 5Z"/></svg></span> Voir l’exemple</button></div>
+          <div class="hero-actions"><a class="btn primary big" href="#dropzone">Nettoyer mes fichiers <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 18 18 6M6 6h12v12"/></svg></a><button class="demo-link" id="heroDemoBtn" type="button"><span class="play-icon" aria-hidden="true"><svg viewBox="0 0 16 16" width="10" height="10" fill="currentColor"><path d="m5 3 8 5-8 5Z"/></svg></span><span class="desktop-copy">Voir l’exemple</span><span class="mobile-copy">Exemple</span></button></div>
           <ul class="trust"><li><span aria-hidden="true">✓</span> Gratuit</li><li><span aria-hidden="true">✓</span> Sans compte</li><li><span aria-hidden="true">✓</span> Vos fichiers restent chez vous</li></ul>
         </div>
         <div class="hero-visual" aria-label="Exemple illustratif de nettoyage d’un fichier">
@@ -56,7 +57,7 @@
     <section class="atelier-section gutter" id="atelier">
       <div class="container atelier-shell">
         <div class="atelier-copy"><p class="eyebrow">01 / À vous de jouer</p><h2>Un fichier en vrac ?<br>Faites-lui du <em>bien.</em></h2><p>Un ou plusieurs fichiers. Quelques réglages si vous le souhaitez. Et un tableur qui respire.</p><div class="local-promise"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="5" y="10" width="14" height="11" rx="3"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg><span>Le ménage se fait ici.<br><strong>Vos données restent chez vous.</strong></span></div></div>
-        <div class="dropzone" id="dropzone"><div class="dropzone-top"><span class="mono">VOTRE POINT DE DÉPART</span><span class="dropzone-plus" aria-hidden="true">↗</span></div><div class="icon" aria-hidden="true"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M28 6H13a3 3 0 0 0-3 3v30a3 3 0 0 0 3 3h22a3 3 0 0 0 3-3V16Z"/><path d="M28 6v10h10M24 32V21m-5 5 5-5 5 5"/></svg></div><h2>Déposez vos fichiers ici</h2><p>Glissez-les dans cette zone<br>ou choisissez-les sur votre appareil.</p><div class="actions"><input type="file" id="fileInput" multiple accept=".xlsx,.xlsm,.xls,.csv,.tsv,.txt,.ods"><label for="fileInput" class="btn primary big" id="pickBtn">Choisir des fichiers <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 18 18 6M6 6h12v12"/></svg></label><button type="button" class="btn big" id="demoBtn">Essayer avec un exemple</button></div><div class="formats" aria-label="Formats acceptés"><span>.xlsx</span><span>.xls</span><span>.csv</span><span>.tsv</span><span>.txt</span></div><small class="paste-hint">Un tableau dans le presse-papiers ? Collez-le avec Ctrl+V.</small></div>
+        <div class="dropzone" id="dropzone"><div class="dropzone-top"><span class="mono">VOTRE POINT DE DÉPART</span><span class="dropzone-plus" aria-hidden="true">↗</span></div><div class="icon" aria-hidden="true"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M28 6H13a3 3 0 0 0-3 3v30a3 3 0 0 0 3 3h22a3 3 0 0 0 3-3V16Z"/><path d="M28 6v10h10M24 32V21m-5 5 5-5 5 5"/></svg></div><h2>Déposez vos fichiers ici</h2><p><span class="desktop-copy">Glissez-les dans cette zone<br>ou choisissez-les sur votre appareil.</span><span class="mobile-copy">Sélectionnez vos fichiers<br>depuis votre téléphone.</span></p><div class="actions"><input type="file" id="fileInput" multiple accept=".xlsx,.xlsm,.xls,.csv,.tsv,.txt,.ods"><label for="fileInput" class="btn primary big" id="pickBtn">Choisir des fichiers <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 18 18 6M6 6h12v12"/></svg></label><button type="button" class="btn big" id="demoBtn">Essayer avec un exemple</button></div><div class="formats" aria-label="Formats acceptés"><span>.xlsx</span><span>.xls</span><span>.csv</span><span>.tsv</span><span>.txt</span></div><small class="paste-hint">Un tableau dans le presse-papiers ? Collez-le avec Ctrl+V.</small></div>
       </div>
     </section>
     <section class="compare gutter" aria-label="Exemple avant et après"><div class="container compare-heading"><p class="eyebrow">C’est toujours votre fichier.</p><h2>Juste sa meilleure version.</h2><p>Exemple illustratif : les valeurs d’origine restent consultables dans le journal.</p></div><div class="container compare-grid">
@@ -85,13 +86,14 @@
 
       <div class="kpis" id="kpis"></div>
 
-      <div class="download">
+      <div class="download" role="region" aria-label="Exporter les données">
         <div class="txt"><strong>Votre fichier est prêt</strong><span>Classeur Excel : données propres, liste des corrections et rapport.</span></div>
         <div class="btns">
           <button type="button" class="btn primary" id="dlXlsx">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11"/><path d="m7 10 5 5 5-5"/><path d="M5 20h14"/></svg>Télécharger Excel
           </button>
           <button type="button" class="btn" id="dlCsv">CSV</button>
+          <span id="csvFormatHome" hidden></span>
           <select id="csvFormat" aria-label="Format du CSV">
             <option value="std">CSV standard (virgule)</option>
             <option value="fr">CSV pour Excel français (point-virgule)</option>
@@ -115,6 +117,9 @@
               <label class="toggle"><span>Colonne « Source »<small>Fichier d'origine de chaque ligne</small></span><input type="checkbox" id="opt-addSource" checked></label>
               <label class="field" for="dateFormat">Affichage des dates
                 <select id="dateFormat"><option value="iso">AAAA-MM-JJ (2026-01-31)</option><option value="dmy">JJ/MM/AAAA (31/01/2026)</option></select>
+              </label>
+              <label class="field mobile-csv-setting" for="csvFormat">Format de l’export CSV
+                <span id="csvFormatMobile"></span>
               </label>
             </div>
           </section>
@@ -145,8 +150,12 @@
               </div>
               <span class="count" id="previewCount"></span>
             </div>
-            <div class="legend"><span><i style="background:var(--fix)"></i>Corrigée (survolez pour voir l'original)</span><span><i style="background:var(--warn-soft)"></i>À vérifier</span><span><i style="background:var(--bad-soft)"></i>Illisible, retirée</span></div>
+            <div class="mobile-view" role="group" aria-label="Affichage des données"><button type="button" data-preview-view="cards" aria-pressed="true" aria-controls="previewCards">Fiches</button><button type="button" data-preview-view="table" aria-pressed="false" aria-controls="previewTable">Tableau</button></div>
+            <div id="previewCardsNav" class="record-pagination" hidden><button type="button" class="btn" id="cardsPrev" aria-label="Page de fiches précédente">Précédent</button><span id="cardsPage" aria-live="polite"></span><button type="button" class="btn" id="cardsNext" aria-label="Page de fiches suivante">Suivant</button></div>
+            <p class="record-hint">Les valeurs d’origine restent consultables dans chaque fiche.</p>
+            <div class="legend"><span><i style="background:var(--fix)"></i>Corrigée</span><span><i style="background:var(--warn-soft)"></i>À vérifier</span><span><i style="background:var(--bad-soft)"></i>Illisible, retirée</span></div>
             <div class="table-wrap"><table class="data" id="previewTable"></table></div>
+            <div id="previewCards" class="record-cards" hidden></div>
           </div>
 
           <div class="tabpanel" role="tabpanel" id="panel-changes" aria-labelledby="tab-changes" hidden>
@@ -230,12 +239,12 @@
 <div class="busy" id="busy" hidden><div><span class="spin" aria-hidden="true"></span><span id="busyText">Nettoyage en cours…</span></div></div>
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
-<script src="assets/js/appearance.js?v=20261114-2"></script>
+<script src="assets/js/appearance.js?v=20261115-mobile-1"></script>
 <script src="assets/js/zip.js"></script>
 <script src="assets/js/xlsx-write.js?v=20261114-2"></script>
 <script src="assets/js/io.js"></script>
 <script src="assets/js/engine.js?v=20261114-2"></script>
 <script src="assets/js/sample.js"></script>
-<script src="assets/js/app.js?v=20261114-2"></script>
+<script src="assets/js/app.js?v=20261115-mobile-1"></script>
 </body>
 </html>
