@@ -119,19 +119,47 @@
     }
     return { order: bBig > aBig ? 'mdy' : 'dmy', ambiguous: slashes > 0 && aBig === 0 && bBig === 0, conflict: aBig > 0 && bBig > 0 };
   }
+  // Les dates Excel sont représentées en UTC par le lecteur, sans fuseau dans le fichier.
+  function dateObjectValue(v) {
+    if (isNaN(v)) return null;
+    const day = iso(v.getUTCFullYear(), v.getUTCMonth() + 1, v.getUTCDate());
+    if (!day) return null;
+    if (!(v.getUTCHours() || v.getUTCMinutes() || v.getUTCSeconds() || v.getUTCMilliseconds())) return day;
+    return day + 'T' + v.toISOString().slice(11, -1).replace(/\.000$/, '');
+  }
+  function parseClock(s) {
+    const m = s.match(/^(\d{1,2}):(\d{2})(?::(\d{2})([.,]\d+)?)?(?:\s*(Z|[+-]\d{2}:?\d{2}))?$/i);
+    if (!m || +m[1] > 23 || +m[2] > 59 || +(m[3] || 0) > 59) return null;
+    let zone = (m[5] || '').toUpperCase();
+    if (zone && zone !== 'Z') {
+      zone = zone.replace(/^([+-]\d{2})(\d{2})$/, '$1:$2');
+      if (+zone.slice(1, 3) > 23 || +zone.slice(4) > 59) return null;
+    }
+    const fraction = (m[4] || '').replace(',', '.').replace(/0+$/, '').replace(/\.$/, '');
+    return `${m[1].padStart(2, '0')}:${m[2]}:${m[3] || '00'}${fraction}${zone}`;
+  }
   function parseDate(v, ctx = {}) {
-    if (v instanceof Date) return isNaN(v) ? null : iso(v.getUTCFullYear(), v.getUTCMonth() + 1, v.getUTCDate());
+    if (v instanceof Date) return dateObjectValue(v);
     if (typeof v === 'number') {
-      if (ctx.serial && v > 1 && v < 73051) { const t = new Date(EPOCH + Math.floor(v) * DAY); return iso(t.getUTCFullYear(), t.getUTCMonth() + 1, t.getUTCDate()); }
+      if (ctx.serial && v > 1 && v < 73051) return dateObjectValue(new Date(EPOCH + Math.round(v * DAY)));
       if (ctx.compact && Number.isInteger(v) && v >= 19000101 && v <= 21001231) return parseDate(String(v), ctx);
       return null;
     }
     if (typeof v !== 'string') return null;
     const s = v.trim();
     let m;
-    if ((m = s.match(/^(\d{4})[-\/.](\d{1,2})[-\/.](\d{1,2})(?:[\sT].*)?$/))) return iso(+m[1], +m[2], +m[3]);
+    if ((m = s.match(/^(.+?)[\sT]+(\d{1,2}:\d{2}(?::\d{2}(?:[.,]\d+)?)?(?:\s*(?:Z|[+-]\d{2}:?\d{2}))?)$/i))) {
+      const day = parseDate(m[1], ctx), clock = parseClock(m[2]);
+      return day && clock ? `${day}T${clock}` : null;
+    }
+    if ((m = s.match(/^(.+?)\s+(\d{1,2})\s*h(?:\s*(\d{2}))?(?:\s*(Z|[+-]\d{2}:?\d{2}))?$/i))) {
+      const day = parseDate(m[1], ctx), clock = parseClock(`${m[2]}:${m[3] || '00'}${m[4] || ''}`);
+      return day && clock ? `${day}T${clock}` : null;
+    }
+    if ((m = s.match(/^(\d{4})[-\/.](\d{1,2})[-\/.](\d{1,2})$/))) return iso(+m[1], +m[2], +m[3]);
     if (ctx.compact && (m = s.match(/^(\d{4})(\d{2})(\d{2})$/))) return iso(+m[1], +m[2], +m[3]);
     if ((m = s.match(DMY_RE))) {
+      if (!/^\d{1,2}[\/.\-]\d{1,2}[\/.\-](\d{4}|\d{2})$/.test(s)) return null;
       let a = +m[1], b = +m[2], y = +m[3];
       if (m[3].length === 2) y += y < 50 ? 2000 : 1900;
       if (a > 12) return iso(y, b, a);
@@ -139,19 +167,19 @@
       return ctx.order === 'mdy' ? iso(y, a, b) : iso(y, b, a);
     }
     if (/[a-z]/i.test(s)) {
-      const toks = norm(s).replace(/(\d)(er|e|st|nd|rd|th)\b/g, '$1').split(/[\s,.\-\/]+/).filter((t) => t && !t.includes(':') && !WEEKDAYS.has(t) && t !== 'h');
+      const toks = norm(s).replace(/(\d)(er|e|st|nd|rd|th)\b/g, '$1').split(/[\s,.\-\/]+/).filter((t) => t && !WEEKDAYS.has(t));
       let y = null, mo = null, d = null, junk = 0;
       for (const t of toks) {
         if (/^\d{4}$/.test(t) && y === null) y = +t;
         else if (MONTHS[t] && mo === null) mo = MONTHS[t];
         else if (/^\d{1,2}$/.test(t) && d === null) d = +t;
-        else if (/^\d{1,2}h\d{0,2}$/.test(t)) continue;
         else junk++;
       }
       if (y && mo && d && junk === 0) return iso(y, mo, d);
     }
     return null;
   }
+  const hasTime = (v) => typeof v === 'string' && /(?:[T\s]\d{1,2}\s*[:h]|^\d{4}[-\/.]\d{1,2}[-\/.]\d{1,2}[T\s].)/i.test(v.trim());
 
   /* ---------- Contacts ---------- */
   const EMAIL_RE = /^[a-z0-9._%+'-]+@[a-z0-9-]+(\.[a-z0-9-]+)*\.[a-z]{2,}$/;
@@ -227,12 +255,13 @@
     email: 'Courriel normalisé', phone: 'Téléphone formaté', postal: 'Code postal formaté', bool: 'Oui / Non uniformisé',
     badNumber: 'Valeur non numérique retirée', badDate: 'Date illisible retirée',
     warnEmail: 'Courriel invalide, à vérifier', warnPhone: 'Numéro incomplet, à vérifier', warnPostal: 'Code postal invalide, à vérifier',
+    warnDate: 'Date ou heure à vérifier, valeur conservée',
     spelling: 'Orthographe uniformisée', zeros: 'Zéros initiaux rétablis',
   };
   const LOGCAT = {
     [R.spaces]: 'spaces', [R.invisible]: 'spaces', [R.missing]: 'missing', [R.number]: 'numbers', [R.money]: 'numbers', [R.percent]: 'numbers',
     [R.date]: 'dates', [R.email]: 'contacts', [R.phone]: 'contacts', [R.postal]: 'contacts', [R.bool]: 'bools',
-    [R.badNumber]: 'removed', [R.badDate]: 'removed', [R.warnEmail]: 'warn', [R.warnPhone]: 'warn', [R.warnPostal]: 'warn', [R.spelling]: 'spelling', [R.zeros]: 'zeros',
+    [R.badNumber]: 'removed', [R.badDate]: 'removed', [R.warnEmail]: 'warn', [R.warnPhone]: 'warn', [R.warnPostal]: 'warn', [R.warnDate]: 'warn', [R.spelling]: 'spelling', [R.zeros]: 'zeros',
   };
 
   const asText = (v) => (v instanceof Date ? (parseDate(v) || '') : typeof v === 'boolean' ? (v ? 'Oui' : 'Non') : String(v));
@@ -262,6 +291,7 @@
       }
       case 'date': {
         const d = parseDate(o, dctx);
+        if (!d && hasTime(o)) return { v: cleanText(o).v, fix: R.warnDate, status: 'warn' };
         if (!d) return { v: null, fix: R.badDate, status: 'removed' };
         return { v: d, fix: raw !== null && raw !== d ? R.date : typeof o === 'number' ? R.date : null };
       }
@@ -353,7 +383,7 @@
     for (const input of inputs) {
       const rows = (input.rows || []).map((r) => (Array.isArray(r) ? r : []));
       const h = findHeader(rows);
-      const info = { name: input.name, rows: 0, header: h };
+      const info = { name: input.name, rows: 0, readRows: 0, header: h };
       meta.inputs.push(info);
       if (h < 0) { notes.push(`« ${input.name} » ne contient aucune donnée.`); continue; }
       if (opt.skipTitleRows) log.title += rows.slice(0, h).filter((r) => nonBlank(r)).length;
@@ -383,6 +413,7 @@
       const headerSig = headerRow.map((c) => norm(c ?? '')).join('|');
       let lastData = rows.length - 1;
       while (lastData > h && !nonBlank(rows[lastData])) lastData--;
+      info.readRows = lastData - h;
       for (let r = h + 1; r <= lastData; r++) {
         const row = rows[r];
         if (!nonBlank(row)) { log.empty++; continue; }
@@ -515,6 +546,8 @@
         const x = a[0].cells[di].v, y = b[0].cells[di].v;
         if (x === y) return a[1] - b[1];
         if (x == null) return 1; if (y == null) return -1;
+        const tx = Date.parse(x), ty = Date.parse(y);
+        if (isFinite(tx) && isFinite(ty) && tx !== ty) return tx - ty;
         return x < y ? -1 : 1;
       }).map((p) => p[0]);
     }
@@ -544,7 +577,9 @@
       changes,
       log: LOG_DEF.map(([id, label, kind]) => ({ id, label, kind, count: log[id] })),
       notes,
-      meta: { ...meta, inputRows: records.length, outputRows: out.length, cellsFixed, cellsTotal: Math.max(1, records.length * Math.max(1, outCols.length)) },
+      meta: { ...meta, inputRows: meta.inputs.reduce((n, i) => n + i.readRows, 0), candidateRows: records.length, outputRows: out.length,
+        removedRows: log.dups + log.empty + log.totals + log.repeatHeader + log.footer,
+        cellsFixed, cellsTotal: Math.max(1, records.length * Math.max(1, outCols.length)) },
     };
   }
 
@@ -552,7 +587,7 @@
   const nf = new Intl.NumberFormat('fr-CA', { maximumFractionDigits: 4 });
   const cf = new Intl.NumberFormat('fr-CA', { style: 'currency', currency: 'CAD' });
   const pf = new Intl.NumberFormat('fr-CA', { style: 'percent', maximumFractionDigits: 2 });
-  const dmy = (isoStr) => { const [y, m, d] = isoStr.split('-'); return `${d}/${m}/${y}`; };
+  const dmy = (isoStr) => String(isoStr).replace(/^(\d{4})-(\d{2})-(\d{2})(.*)$/, (_, y, m, d, time) => `${d}/${m}/${y}${time.replace(/^T/, ' ')}`);
   function display(col, v, opts = {}) {
     if (v == null) return '';
     if (typeof v === 'number') return col.type === 'money' ? cf.format(v) : col.type === 'percent' ? pf.format(v) : nf.format(v);
@@ -597,8 +632,9 @@
       rows: [
         ['Généré par', 'Décrasse'],
         ['Date', new Date().toISOString().slice(0, 10)],
-        ['Fichiers', result.meta.inputs.map((i) => `${i.name} (${i.rows} lignes)`).join(', ')],
+        ['Fichiers', result.meta.inputs.map((i) => `${i.name} (${i.readRows} lignes lues)`).join(', ')],
         ['Lignes lues', String(result.meta.inputRows)],
+        ['Lignes retirées', String(result.meta.removedRows)],
         ['Lignes propres', String(result.meta.outputRows)],
         ['Cellules corrigées', String(result.meta.cellsFixed)],
         ['', ''],

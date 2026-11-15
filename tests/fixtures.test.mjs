@@ -18,7 +18,7 @@ for (const file of ['openpyxl.xlsx', 'lo/openpyxl.xlsx']) {
     const by = (l) => res.columns.findIndex((c) => c.label === l);
     assert.equal(res.log.find((l) => l.id === 'title').count, 1);
     assert.deepEqual(res.columns.map((c) => c.type), ['date', 'text', 'money', 'percent', 'bool']);
-    assert.deepEqual(res.rows.map((r) => r.cells[by('Date')].v), ['2026-01-03', '2026-01-15', '2026-02-01']);
+    assert.deepEqual(res.rows.map((r) => r.cells[by('Date')].v), ['2026-01-03', '2026-01-15T14:30:00', '2026-02-01']);
     assert.deepEqual(res.rows.map((r) => r.cells[by('Montant')].v), [1250.5, 1300, 99.99]);
     assert.deepEqual(res.rows.map((r) => r.cells[by('Taux de commande') >= 0 ? 0 : by('Taux')].v), [0.12, 0.07, 0.05]);
     assert.deepEqual(res.rows.map((r) => r.cells[by('Client')].v), ['Alpha inc.', 'Alpha inc.', 'Bêta ltée']);

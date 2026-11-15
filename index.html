@@ -4,9 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Décrasse</title>
-<meta name="claude:viewport-fit-sides" content="cover">
 <meta name="description" content="Nettoyez vos fichiers Excel et CSV en quelques secondes : dates, montants, doublons, orthographe, courriels et téléphones. Gratuit, sans compte, vos données ne quittent pas votre ordinateur.">
-<meta name="theme-color" content="#2A55C9">
+<meta name="theme-color" content="#F6F5EE">
 <link rel="canonical" href="https://decrasse.ca/">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="fr_CA">
@@ -20,141 +19,57 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="assets/css/app.css">
+<link rel="stylesheet" href="assets/css/app.css?v=20261114-2">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Décrasse","applicationCategory":"BusinessApplication","operatingSystem":"Web","inLanguage":"fr-CA","offers":{"@type":"Offer","price":"0","priceCurrency":"CAD"},"description":"Nettoyage automatique de fichiers Excel et CSV dans le navigateur."}</script>
+<link rel="stylesheet" href="assets/css/atelier.css?v=20261114-2">
 </head>
 <body>
 <a class="visually-hidden" href="#main">Aller au contenu</a>
-
 <header class="site-header gutter">
   <div class="container">
-    <a class="logo" href="./" aria-label="Décrasse, accueil">
-      <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#2A55C9"/><rect x="7" y="8" width="18" height="3.2" rx="1.6" fill="#fff"/><rect x="7" y="14.4" width="18" height="3.2" rx="1.6" fill="#fff"/><rect x="7" y="20.8" width="11" height="3.2" rx="1.6" fill="#FFD45C"/></svg>
-      Décrasse
-    </a>
-    <nav class="site-nav" aria-label="Navigation principale">
-      <a class="opt" href="#corrections">Ce qui est corrigé</a>
-      <a class="opt" href="#faq">FAQ</a>
-      <a href="confidentialite.html">Confidentialité</a>
-    </nav>
+    <a class="logo" href="./" aria-label="Décrasse, accueil"><svg viewBox="0 0 36 36" aria-hidden="true"><rect width="36" height="36" rx="11" fill="currentColor"/><path d="M10 11h16M10 18h16" stroke="var(--bg)" stroke-width="3" stroke-linecap="round"/><path d="M10 25h9" stroke="#D4EE67" stroke-width="3" stroke-linecap="round"/></svg><span>Décrasse<span class="logo-period">.</span></span></a>
+    <nav class="site-nav" aria-label="Navigation principale"><a class="opt" href="#corrections">Ce qui change</a><a class="opt" href="#comment">Comment ça marche</a><a class="opt" href="#faq">FAQ</a></nav>
+    <div class="header-actions"><button class="theme-toggle" id="themeToggle" type="button" aria-label="Passer au thème sombre" aria-pressed="false"><svg class="theme-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M20.5 13A8.6 8.6 0 0 1 11 3.5 8.7 8.7 0 1 0 20.5 13Z"/></svg><svg class="theme-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/></svg></button><a class="btn nav-cta" href="#dropzone" data-start><span data-start-label>Faire place nette</span><span aria-hidden="true">↗</span></a></div>
   </div>
 </header>
-
 <main id="main">
-  <!-- ===== Accueil ===== -->
   <div id="landing">
     <section class="hero gutter">
-      <div class="container">
-        <div>
-          <p class="eyebrow">Nettoyage de fichiers Excel et CSV</p>
-          <h1 style="margin-top:12px">Vos tableurs en désordre, <mark>propres</mark> en quelques secondes.</h1>
-          <p class="lede">Dates dans tous les formats, montants écrits à la main, doublons, « Trois-Rivières » écrit de quatre façons : Décrasse corrige tout, fusionne vos fichiers et vous rend un classeur Excel prêt à analyser.</p>
-          <ul class="trust">
-            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Vos fichiers ne quittent pas votre ordinateur</li>
-            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Gratuit, sans compte</li>
-            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Chaque correction est listée</li>
-          </ul>
+      <div class="container hero-grid">
+        <div class="hero-copy">
+          <p class="eyebrow hero-kicker"><span class="status-dot"></span> Du propre dans vos données</p>
+          <h1>Le bazar,<br>c’est <em>fini.</em><span class="hero-star" aria-hidden="true">✳</span></h1>
+          <p class="lede">Vos Excel et CSV, remis d’aplomb.<br>Dates, montants, doublons : Décrasse fait le ménage. Vous gardez le contrôle.</p>
+          <div class="hero-actions"><a class="btn primary big" href="#dropzone">Nettoyer mes fichiers <span aria-hidden="true">↗</span></a><button class="demo-link" id="heroDemoBtn" type="button"><span class="play-icon" aria-hidden="true">▶</span> Voir l’exemple</button></div>
+          <ul class="trust"><li><span aria-hidden="true">✓</span> Gratuit</li><li><span aria-hidden="true">✓</span> Sans compte</li><li><span aria-hidden="true">✓</span> Vos fichiers restent chez vous</li></ul>
         </div>
-        <div class="dropzone" id="dropzone">
-          <div class="icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M12 18v-6"/><path d="m9 15 3-3 3 3"/></svg></div>
-          <h2>Déposez vos fichiers ici</h2>
-          <p>Un ou plusieurs fichiers : ils seront fusionnés.<br>Vous pouvez aussi coller un tableau copié depuis Excel (Ctrl+V).</p>
-          <div class="actions">
-            <input type="file" id="fileInput" multiple accept=".xlsx,.xlsm,.xls,.csv,.tsv,.txt,.ods">
-            <label for="fileInput" class="btn primary big" id="pickBtn">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
-              Choisir des fichiers
-            </label>
-            <button type="button" class="btn big" id="demoBtn">Essayer avec un exemple</button>
-          </div>
-          <div class="formats" aria-label="Formats acceptés"><span>.xlsx</span><span>.xls</span><span>.csv</span><span>.tsv</span><span>.txt</span></div>
+        <div class="hero-visual" aria-label="Exemple illustratif de nettoyage d’un fichier">
+          <div class="visual-grid" aria-hidden="true"></div><span class="visual-label">UN PETIT AVANT / APRÈS</span>
+          <div class="file-card raw-card"><div class="file-card-top"><span class="file-type">CSV</span><span>ventes_en_vrac.csv</span><span class="file-dots" aria-hidden="true">•••</span></div><div class="mini-table raw-data"><div class="mini-th"><span>Date</span><span>Ville</span><span>Montant</span></div><div><span class="raw-cell">12 janv. 2026</span><span>TROIS-RIVIERES</span><span class="raw-cell">119,95 $</span></div><div><span>2026/01/14</span><span>Shawinigan</span><span>214,00 $</span></div><div class="struck"><span>2026/01/14</span><span>Shawinigan</span><span>214,00 $</span></div></div><div class="raw-note"><span aria-hidden="true">↳</span> Ça vous dit quelque chose ?</div></div>
+          <div class="transform-arrow" aria-hidden="true"><svg viewBox="0 0 120 65" fill="none"><path d="M3 5c15 48 56 50 91 24" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="4 6"/><path d="m78 27 19-2-5 19" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="file-card clean-card"><div class="file-card-top"><span class="file-type xlsx">XLSX</span><span>ventes_au_propre.xlsx</span><span class="clean-check" aria-label="Nettoyé">✓</span></div><div class="mini-table clean-data"><div class="mini-th"><span>Date</span><span>Ville</span><span>Montant</span></div><div><span>2026-01-12</span><span>Trois-Rivières</span><span>119,95 $</span></div><div><span>2026-01-14</span><span>Shawinigan</span><span>214,00 $</span></div></div><div class="clean-note"><span class="status-dot"></span> Harmonisé. Dédupliqué. Prêt à analyser.</div></div>
+          <div class="visual-sticker"><span aria-hidden="true">✳</span><div>Tout s’éclaire.<small>Et ça fait du bien.</small></div></div>
         </div>
       </div>
+      <div class="container format-ribbon"><span>Fait pour vos fichiers du quotidien</span><div><strong>Excel<span>.xlsx / .xls</span></strong><i aria-hidden="true">✳</i><strong>CSV<span>et TSV</span></strong><i aria-hidden="true">✳</i><strong>Vos exports<span>compta, CRM, formulaires</span></strong></div></div>
     </section>
-
-    <section class="compare gutter" aria-label="Exemple avant et après">
-      <div class="container compare-grid">
-        <div class="sheet">
-          <header><span>Avant</span><span class="mono">ventes_janvier.csv</span></header>
-          <div class="scroll"><table>
-            <thead><tr><th>Date</th><th>Nom client</th><th>Ville</th><th>Montant ($)</th></tr></thead>
-            <tbody>
-              <tr><td class="mess">05/01/2026</td><td class="mess">␣Dépanneur Chez Ti-Jean␣</td><td class="mess">trois-rivieres</td><td class="mess">89,99</td></tr>
-              <tr><td class="mess">12 janv. 2026</td><td class="mess">Boulangerie Lavoie</td><td class="mess">TROIS-RIVIÈRES␣</td><td class="mess">119,95</td></tr>
-              <tr><td class="mess">2026-01-14</td><td class="mess">Clinique Vet Mauricie</td><td class="mess">Shawinigan</td><td class="mess">214,00 $</td></tr>
-              <tr><td class="mess gone">2026-01-14</td><td class="mess gone">Clinique Vet Mauricie</td><td class="mess gone">Shawinigan</td><td class="mess gone">214,00 $</td></tr>
-              <tr><td class="mess gone">TOTAL</td><td class="mess gone"></td><td class="mess gone"></td><td class="mess gone">6 849,04 $</td></tr>
-            </tbody>
-          </table></div>
-        </div>
-        <div class="arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
-        <div class="sheet">
-          <header><span>Après</span><span class="mono">ventes-propre.xlsx</span></header>
-          <div class="scroll"><table>
-            <thead><tr><th>Date</th><th>Client</th><th>Ville</th><th>Montant</th></tr></thead>
-            <tbody>
-              <tr><td class="clean fx">2026-01-05</td><td class="clean fx">Dépanneur Chez Ti-Jean</td><td class="clean fx">Trois-Rivières</td><td class="clean fx">89,99 $</td></tr>
-              <tr><td class="clean fx">2026-01-12</td><td class="clean">Boulangerie Lavoie</td><td class="clean fx">Trois-Rivières</td><td class="clean fx">119,95 $</td></tr>
-              <tr><td class="clean">2026-01-14</td><td class="clean">Clinique Vet Mauricie</td><td class="clean">Shawinigan</td><td class="clean fx">214,00 $</td></tr>
-              <tr><td colspan="4" style="color:var(--muted);font-size:12px">Doublon et ligne de total retirés</td></tr>
-            </tbody>
-          </table></div>
-        </div>
+    <section class="atelier-section gutter" id="atelier">
+      <div class="container atelier-shell">
+        <div class="atelier-copy"><p class="eyebrow">01 / À vous de jouer</p><h2>Un fichier en vrac ?<br>Faites-lui du <em>bien.</em></h2><p>Un ou plusieurs fichiers. Quelques réglages si vous le souhaitez. Et un tableur qui respire.</p><div class="local-promise"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="5" y="10" width="14" height="11" rx="3"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg><span>Le ménage se fait ici.<br><strong>Vos données restent chez vous.</strong></span></div></div>
+        <div class="dropzone" id="dropzone"><div class="dropzone-top"><span class="mono">VOTRE POINT DE DÉPART</span><span class="dropzone-plus" aria-hidden="true">↗</span></div><div class="icon" aria-hidden="true"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M28 6H13a3 3 0 0 0-3 3v30a3 3 0 0 0 3 3h22a3 3 0 0 0 3-3V16Z"/><path d="M28 6v10h10M24 32V21m-5 5 5-5 5 5"/></svg></div><h2>Déposez vos fichiers ici</h2><p>Glissez-les dans cette zone<br>ou choisissez-les sur votre appareil.</p><div class="actions"><input type="file" id="fileInput" multiple accept=".xlsx,.xlsm,.xls,.csv,.tsv,.txt,.ods"><label for="fileInput" class="btn primary big" id="pickBtn">Choisir des fichiers <span aria-hidden="true">↗</span></label><button type="button" class="btn big" id="demoBtn">Essayer avec un exemple</button></div><div class="formats" aria-label="Formats acceptés"><span>.xlsx</span><span>.xls</span><span>.csv</span><span>.tsv</span><span>.txt</span></div><small class="paste-hint">Un tableau dans le presse-papiers ? Collez-le avec Ctrl+V.</small></div>
       </div>
     </section>
-
-    <section class="section gutter" id="corrections">
-      <div class="container">
-        <div class="section-head">
-          <p class="eyebrow">Ce que Décrasse corrige</p>
-          <h2>Les erreurs qui faussent vos totaux et vos tableaux croisés</h2>
-          <p>Chaque colonne est analysée pour deviner ce qu'elle contient, puis nettoyée avec les règles qui conviennent. Les formats québécois sont reconnus d'office.</p>
-        </div>
-        <div class="fixes">
-          <article class="fix-card"><h3>Dates dans tous les formats</h3><div class="ex"><span>12 janv. 2026</span><i>→</i><span>2026-01-12</span></div><p>JJ/MM/AAAA, ISO, mois en toutes lettres, dates Excel. Le sens jour/mois est déduit du fichier.</p></article>
-          <article class="fix-card"><h3>Montants et nombres</h3><div class="ex"><span>$1,240.00</span><i>→</i><span>1 240,00 $</span></div><p>Symboles, espaces, virgules et points décimaux : tout devient un vrai nombre que Excel peut additionner.</p></article>
-          <article class="fix-card"><h3>Orthographe uniformisée</h3><div class="ex"><span>TROIS-RIVIERES␣</span><i>→</i><span>Trois-Rivières</span></div><p>Les variantes d'une même valeur (casse, accents, espaces) sont regroupées sous la forme la plus courante.</p></article>
-          <article class="fix-card"><h3>Doublons et lignes parasites</h3><div class="ex"><span>TOTAL ; 6 849 $</span><i>→</i><span>retirée</span></div><p>Lignes en double, lignes vides, titres, sous-totaux et en-têtes répétés sont retirés.</p></article>
-          <article class="fix-card"><h3>Courriels</h3><div class="ex"><span>Info@Lavoie.CA␣</span><i>→</i><span>info@lavoie.ca</span></div><p>Mis en minuscules et validés. Les adresses incomplètes sont signalées, pas effacées.</p></article>
-          <article class="fix-card"><h3>Téléphones</h3><div class="ex"><span>1-418-555-0111</span><i>→</i><span>418 555-0111</span></div><p>Format nord-américain uniforme, postes conservés. Les numéros incomplets sont signalés.</p></article>
-          <article class="fix-card"><h3>Codes postaux</h3><div class="ex"><span>g9a5h7</span><i>→</i><span>G9A 5H7</span></div><p>Format canadien validé, avec l'espace au bon endroit.</p></article>
-          <article class="fix-card"><h3>En-têtes et fusion</h3><div class="ex"><span>Qté · quantity</span><i>→</i><span>Quantité</span></div><p>Les colonnes équivalentes de plusieurs fichiers, en français ou en anglais, sont alignées.</p></article>
-          <article class="fix-card"><h3>Valeurs manquantes</h3><div class="ex"><span>N/A · #N/A · -</span><i>→</i><span>(vide)</span></div><p>Les fausses valeurs qui cassent les calculs deviennent de vraies cellules vides.</p></article>
-        </div>
-      </div>
-    </section>
-
-    <section class="section gutter">
-      <div class="container">
-        <div class="section-head"><p class="eyebrow">Comment ça marche</p><h2>Trois étapes, aucune formule</h2></div>
-        <ol class="steps-3">
-          <li><h3>Déposez vos fichiers</h3><p>Exports de logiciel comptable, de CRM ou de formulaire, un ou plusieurs à la fois. Rien n'est téléversé : le traitement se fait dans votre navigateur.</p></li>
-          <li><h3>Vérifiez les corrections</h3><p>Chaque cellule modifiée est surlignée, avec sa valeur d'origine. Renommez une colonne, changez son type ou désactivez une étape en un clic.</p></li>
-          <li><h3>Téléchargez le fichier propre</h3><p>Un classeur Excel avec les données propres, la liste complète des corrections et un rapport. Ou un CSV, si vous préférez.</p></li>
-        </ol>
-      </div>
-    </section>
-
-    <section class="section gutter" id="faq">
-      <div class="container">
-        <div class="section-head"><p class="eyebrow">Questions fréquentes</p><h2>Avant de vous lancer</h2></div>
-        <div class="faq">
-          <details><summary>Mes fichiers sont-ils envoyés sur un serveur ?</summary><p>Non. Décrasse fonctionne entièrement dans votre navigateur : vos fichiers sont lus et nettoyés sur votre ordinateur, et rien n'est transmis. Vous pouvez même couper Internet une fois la page chargée.</p></details>
-          <details><summary>Est-ce vraiment gratuit ?</summary><p>Oui, sans compte et sans limite de nombre de fichiers.</p></details>
-          <details><summary>Quels formats sont acceptés ?</summary><p>Excel (.xlsx, .xlsm, .xls), CSV, TSV et texte délimité. Le séparateur (virgule, point-virgule, tabulation) et l'encodage sont détectés automatiquement. Pour Google Sheets, utilisez Fichier › Télécharger › Microsoft Excel.</p></details>
-          <details><summary>Et si une correction ne me convient pas ?</summary><p>L'onglet Corrections liste chaque modification avec la valeur d'avant. Dans l'onglet Colonnes, vous pouvez changer le type d'une colonne ou l'exclure, et les réglages permettent de désactiver une étape. Le fichier Excel téléchargé contient aussi une feuille Corrections.</p></details>
-          <details><summary>Comment sont lues les dates comme 05/01/2026 ?</summary><p>Par défaut en jour/mois/année, comme au Québec. Si le fichier contient une date comme 01/25/2026, la colonne entière est lue en mois/jour. Un avis s'affiche quand le format est ambigu.</p></details>
-          <details><summary>Quelle taille de fichier ?</summary><p>Plusieurs centaines de milliers de lignes, selon la mémoire de votre ordinateur. L'aperçu affiche les premières lignes ; le fichier téléchargé contient tout.</p></details>
-        </div>
-      </div>
-    </section>
+    <section class="compare gutter" aria-label="Exemple avant et après"><div class="container compare-heading"><p class="eyebrow">C’est toujours votre fichier.</p><h2>Juste sa meilleure version.</h2><p>Exemple illustratif : les valeurs d’origine restent consultables dans le journal.</p></div><div class="container compare-grid">
+      <div class="sheet"><header><span><i class="sheet-dot before"></i> Avant</span><span class="mono">un peu de chaos</span></header><div class="scroll"><table><thead><tr><th>Date</th><th>Client</th><th>Ville</th><th>Montant</th></tr></thead><tbody><tr><td class="mess">05/01/2026</td><td class="mess">␣Dépanneur Ti-Jean␣</td><td class="mess">trois-rivieres</td><td class="mess">89,99</td></tr><tr><td class="mess">12 janv. 2026</td><td class="mess">Boulangerie Lavoie</td><td class="mess">TROIS-RIVIÈRES␣</td><td class="mess">119,95</td></tr><tr><td class="mess">2026-01-14</td><td class="mess">Clinique Vet Mauricie</td><td class="mess">Shawinigan</td><td class="mess">214,00 $</td></tr><tr><td class="mess gone">2026-01-14</td><td class="mess gone">Clinique Vet Mauricie</td><td class="mess gone">Shawinigan</td><td class="mess gone">214,00 $</td></tr></tbody></table></div></div>
+      <div class="arrow" aria-hidden="true">↗</div><div class="sheet after-sheet"><header><span><i class="sheet-dot after"></i> Après Décrasse</span><span class="mono">beaucoup plus clair</span></header><div class="scroll"><table><thead><tr><th>Date</th><th>Client</th><th>Ville</th><th>Montant</th></tr></thead><tbody><tr><td class="clean fx">2026-01-05</td><td class="clean fx">Dépanneur Ti-Jean</td><td class="clean fx">Trois-Rivières</td><td class="clean fx">89,99 $</td></tr><tr><td class="clean fx">2026-01-12</td><td class="clean">Boulangerie Lavoie</td><td class="clean fx">Trois-Rivières</td><td class="clean fx">119,95 $</td></tr><tr><td class="clean">2026-01-14</td><td class="clean">Clinique Vet Mauricie</td><td class="clean">Shawinigan</td><td class="clean fx">214,00 $</td></tr><tr><td colspan="4" class="sheet-footnote">✓ Un doublon retiré. Les données utiles conservées.</td></tr></tbody></table></div></div>
+    </div></section>
   </div>
-
   <!-- ===== Espace de travail ===== -->
   <section class="workspace gutter" id="workspace" hidden aria-label="Résultat du nettoyage">
     <div class="container">
       <div class="ws-top">
         <div>
+          <p class="eyebrow workspace-eyebrow"><span class="status-dot"></span> Votre atelier</p>
           <h1 id="wsTitle">Résultat</h1>
           <p class="sub" id="wsSub"></p>
         </div>
@@ -165,6 +80,7 @@
           <button type="button" class="btn ghost" id="resetBtn">Recommencer</button>
         </div>
       </div>
+      <ol class="workflow" aria-label="Étapes du nettoyage"><li class="done"><span>01</span> Fichiers importés</li><li class="current"><span>02</span> À vous de vérifier</li><li><span>03</span> Prêts à exporter</li></ol>
       <div class="chips" id="chips"></div>
 
       <div class="kpis" id="kpis"></div>
@@ -187,6 +103,7 @@
 
       <div class="ws-grid">
         <aside class="side">
+          <details class="settings-disclosure" open><summary>Réglages et journal <span>Personnaliser le nettoyage</span></summary><div class="side-panels">
           <section class="panel">
             <h2>Réglages</h2>
             <div class="opts" id="opts">
@@ -205,6 +122,7 @@
             <h2>Journal de nettoyage</h2>
             <ol class="journal" id="journal"></ol>
           </section>
+        </div></details>
         </aside>
 
         <div class="results">
@@ -258,24 +176,66 @@
       </div>
     </div>
   </section>
+    <section class="section gutter" id="corrections">
+      <div class="container">
+        <div class="section-head">
+          <p class="eyebrow">02 / Le grand ménage</p>
+          <h2>Les petits détails.<br>La grande différence.</h2>
+          <p>Du premier espace en trop au dernier doublon : chaque correction est visible, et vous gardez la main sur le résultat.</p>
+        </div>
+        <div class="fixes">
+          <article class="fix-card"><h3>Dates dans tous les formats</h3><div class="ex"><span>12 janv. 2026</span><i>→</i><span>2026-01-12</span></div><p>Formats français, américains ou Excel : les dates sont harmonisées, les heures et les fuseaux sont conservés.</p></article>
+          <article class="fix-card"><h3>Montants et nombres</h3><div class="ex"><span>$1,240.00</span><i>→</i><span>1 240,00 $</span></div><p>Symboles, espaces, virgules et points décimaux : tout devient un vrai nombre que Excel peut additionner.</p></article>
+          <article class="fix-card"><h3>Orthographe uniformisée</h3><div class="ex"><span>TROIS-RIVIERES␣</span><i>→</i><span>Trois-Rivières</span></div><p>Les variantes d'une même valeur (casse, accents, espaces) sont regroupées sous la forme la plus courante.</p></article>
+          <article class="fix-card"><h3>Doublons et lignes parasites</h3><div class="ex"><span>TOTAL ; 6 849 $</span><i>→</i><span>retirée</span></div><p>Lignes en double, lignes vides, titres, sous-totaux et en-têtes répétés sont retirés.</p></article>
+          <article class="fix-card"><h3>Courriels</h3><div class="ex"><span>Info@Lavoie.CA␣</span><i>→</i><span>info@lavoie.ca</span></div><p>Mis en minuscules et validés. Les adresses incomplètes sont signalées, pas effacées.</p></article>
+          <article class="fix-card"><h3>Téléphones</h3><div class="ex"><span>1-418-555-0111</span><i>→</i><span>418 555-0111</span></div><p>Format nord-américain uniforme, postes conservés. Les numéros incomplets sont signalés.</p></article>
+          <article class="fix-card"><h3>Codes postaux</h3><div class="ex"><span>g9a5h7</span><i>→</i><span>G9A 5H7</span></div><p>Format canadien validé, avec l'espace au bon endroit.</p></article>
+          <article class="fix-card"><h3>En-têtes et fusion</h3><div class="ex"><span>Qté · quantity</span><i>→</i><span>Quantité</span></div><p>Les colonnes équivalentes de plusieurs fichiers, en français ou en anglais, sont alignées.</p></article>
+          <article class="fix-card"><h3>Valeurs manquantes</h3><div class="ex"><span>N/A · #N/A · -</span><i>→</i><span>(vide)</span></div><p>Les fausses valeurs qui cassent les calculs deviennent de vraies cellules vides.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section gutter process-section" id="comment">
+      <div class="container">
+        <div class="section-head"><p class="eyebrow">03 / Simple comme ça</p><h2>Du fichier brut<br>au prochain déclic.</h2></div>
+        <ol class="steps-3">
+          <li><h3>Déposez vos fichiers</h3><p>Exports de logiciel comptable, de CRM ou de formulaire, un ou plusieurs à la fois. Rien n'est téléversé : le traitement se fait dans votre navigateur.</p></li>
+          <li><h3>Vérifiez les corrections</h3><p>Chaque cellule modifiée est surlignée, avec sa valeur d'origine. Renommez une colonne, changez son type ou désactivez une étape en un clic.</p></li>
+          <li><h3>Téléchargez le fichier propre</h3><p>Un classeur Excel avec les données propres, la liste complète des corrections et un rapport. Ou un CSV, si vous préférez.</p></li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="section gutter" id="faq">
+      <div class="container faq-layout">
+        <div class="section-head"><p class="eyebrow">04 / On vous répond</p><h2>Tout est clair ?<br>On s’en assure.</h2><p>Quelques réponses avant de faire place nette.</p></div>
+        <div class="faq">
+          <details><summary>Mes fichiers sont-ils envoyés sur un serveur ?</summary><p>Non. Décrasse fonctionne entièrement dans votre navigateur : vos fichiers sont lus et nettoyés sur votre ordinateur, et rien n'est transmis. Vous pouvez même couper Internet une fois la page chargée.</p></details>
+          <details><summary>Est-ce vraiment gratuit ?</summary><p>Oui, sans compte et sans limite de nombre de fichiers.</p></details>
+          <details><summary>Quels formats sont acceptés ?</summary><p>Excel (.xlsx, .xlsm, .xls), CSV, TSV et texte délimité. Le séparateur (virgule, point-virgule, tabulation) et l'encodage sont détectés automatiquement. Pour Google Sheets, utilisez Fichier › Télécharger › Microsoft Excel.</p></details>
+          <details><summary>Et si une correction ne me convient pas ?</summary><p>L'onglet Corrections liste chaque modification avec la valeur d'avant. Dans l'onglet Colonnes, vous pouvez changer le type d'une colonne ou l'exclure, et les réglages permettent de désactiver une étape. Le fichier Excel téléchargé contient aussi une feuille Corrections.</p></details>
+          <details><summary>Comment sont lues les dates comme 05/01/2026 ?</summary><p>Par défaut en jour/mois/année, comme au Québec. Si le fichier contient une date comme 01/25/2026, la colonne entière est lue en mois/jour. Un avis s'affiche quand le format est ambigu.</p></details>
+          <details><summary>Les heures de mes opérations sont-elles conservées ?</summary><p>Oui. Les heures, les fractions de seconde et les fuseaux reconnus sont conservés. Dans Excel, les horodatages restent du texte pour préserver cette information. Une heure non reconnue est conservée et signalée pour vérification.</p></details>
+          <details><summary>Quelle taille de fichier ?</summary><p>Plusieurs centaines de milliers de lignes, selon la mémoire de votre ordinateur. L'aperçu affiche les premières lignes ; le fichier téléchargé contient tout.</p></details>
+        </div>
+      </div>
+    </section>
+
+  <section class="closing-section gutter"><div class="container closing-inner"><span class="closing-star" aria-hidden="true">✳</span><div><p class="eyebrow">Prêt pour la suite ?</p><h2>Faites place aux<br><em>bonnes idées.</em></h2></div><a class="btn primary big" href="#dropzone" data-start><span data-start-label>Nettoyer mes fichiers</span><span aria-hidden="true">↗</span></a></div></section>
 </main>
-
-<footer class="site-footer gutter">
-  <div class="container">
-    <span>© <span id="year">2026</span> Décrasse · Fait au Québec</span>
-    <nav aria-label="Liens de pied de page"><a href="#faq">FAQ</a><a href="confidentialite.html">Confidentialité</a></nav>
-  </div>
-</footer>
-
+<footer class="site-footer gutter"><div class="container"><div class="footer-wordmark" aria-hidden="true">Décrasse<span>.</span></div><div class="footer-bottom"><span>© <span id="year">2026</span> Décrasse · Fait au Québec, pour y voir plus clair.</span><nav aria-label="Liens de pied de page"><a href="#faq">FAQ</a><a href="confidentialite.html">Confidentialité</a><a href="#main">Tout en haut ↑</a></nav></div></div></footer>
 <div class="drag-veil" id="dragVeil" hidden><div>Déposez vos fichiers pour les nettoyer</div></div>
 <div class="busy" id="busy" hidden><div><span class="spin" aria-hidden="true"></span><span id="busyText">Nettoyage en cours…</span></div></div>
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
+<script src="assets/js/appearance.js?v=20261114-2"></script>
 <script src="assets/js/zip.js"></script>
-<script src="assets/js/xlsx-write.js"></script>
+<script src="assets/js/xlsx-write.js?v=20261114-2"></script>
 <script src="assets/js/io.js"></script>
-<script src="assets/js/engine.js"></script>
+<script src="assets/js/engine.js?v=20261114-2"></script>
 <script src="assets/js/sample.js"></script>
-<script src="assets/js/app.js"></script>
+<script src="assets/js/app.js?v=20261114-2"></script>
 </body>
 </html>

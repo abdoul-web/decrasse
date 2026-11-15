@@ -6,8 +6,8 @@ const root = new URL('../', import.meta.url);
 const read = (p) => readFileSync(new URL(p, root), 'utf8');
 let html = read('index.html');
 
-html = html.replace(/<link rel="stylesheet" href="assets\/css\/app.css">/, () => `<style>\n${read('assets/css/app.css')}\n</style>`);
-html = html.replace(/<script src="(assets\/js\/[\w-]+\.js)"><\/script>/g, (_, p) => `<script>\n${read(p).replace(/<\/script/gi, '<\\/script')}\n</script>`);
+html = html.replace(/<link rel="stylesheet" href="(assets\/css\/[\w-]+\.css)(?:\?[^\"]*)?">/g, (_, p) => `<style>\n${read(p)}\n</style>`);
+html = html.replace(/<script src="(assets\/js\/[\w-]+\.js)(?:\?[^\"]*)?"><\/script>/g, (_, p) => `<script>\n${read(p).replace(/<\/script/gi, '<\\/script')}\n</script>`);
 html = html.replace(/<link rel="(icon|apple-touch-icon|manifest|canonical)"[^>]*>\n?/g, '');
 html = html.replace(/href="confidentialite\.html"/g, 'href="#faq"');
 

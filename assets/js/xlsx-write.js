@@ -36,6 +36,7 @@
     if (kind === 'date') {
       const m = String(v).match(/^(\d{4})-(\d{2})-(\d{2})$/);
       if (m) return `<c r="${ref}" s="${S.date}"><v>${(Date.UTC(+m[1], +m[2] - 1, +m[3]) - EPOCH) / 86400000}</v></c>`;
+      // Un horodatage reste du texte : Excel ne conserve pas les fuseaux ni toute la précision des fractions de seconde.
     }
     if (typeof v === 'number' && isFinite(v)) {
       const s = kind === 'money' ? S.money : kind === 'percent' ? S.percent : S.number;
@@ -54,7 +55,7 @@
       let w = String(c.label).length + 4;
       for (let r = 0; r < Math.min(sheet.rows.length, 300); r++) {
         const v = sheet.rows[r][i];
-        const len = c.kind === 'date' ? 11 : c.kind === 'money' ? String(Math.round(Math.abs(v || 0))).length + 7 : String(v ?? '').length + 2;
+        const len = c.kind === 'money' ? String(Math.round(Math.abs(v || 0))).length + 7 : String(v ?? '').length + 2;
         if (len > w) w = len;
       }
       return Math.min(c.maxWidth || 60, Math.max(8, w));

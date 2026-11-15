@@ -117,6 +117,12 @@
     const was = !$('#workspace').hidden;
     $('#landing').hidden = ws;
     $('#workspace').hidden = !ws;
+    document.body.classList.toggle('workspace-open', ws);
+    for (const link of document.querySelectorAll('[data-start]')) {
+      link.setAttribute('href', ws ? '#workspace' : '#dropzone');
+      const label = link.querySelector('[data-start-label]');
+      if (label) label.textContent = ws ? 'Mes résultats' : link.classList.contains('nav-cta') ? 'Faire place nette' : 'Nettoyer mes fichiers';
+    }
     if (ws && !was) window.scrollTo({ top: 0 });
   }
 
@@ -134,7 +140,7 @@
     $('#chips').innerHTML = state.files.map((f) => {
       const usable = f.sheets.map((s, i) => ({ s, i })).filter(({ s }) => !s.hidden && hasData(s));
       const info = r.meta.inputs.filter((x) => x.name === f.name || x.name.startsWith(f.name + ' › '));
-      const rows = info.reduce((a, x) => a + x.rows, 0);
+      const rows = info.reduce((a, x) => a + x.readRows, 0);
       const sel = usable.length > 1
         ? `<select data-sheet="${f.id}" aria-label="Feuille à utiliser pour ${esc(f.name)}">${usable.map(({ s, i }) => `<option value="${i}"${f.sheet === i ? ' selected' : ''}>${esc(s.name)}</option>`).join('')}<option value="all"${f.sheet === 'all' ? ' selected' : ''}>Toutes les feuilles de données (${dataSheets(usable.map(({ s }) => s)).length})</option></select>`
         : '';
@@ -145,10 +151,13 @@
   function renderKpis() {
     const r = state.result, L = Object.fromEntries(r.log.map((l) => [l.id, l.count]));
     const attention = L.warn + L.removed;
+    const removed = [[L.dups, 'doublon', 'doublons'], [L.totals, 'total', 'totaux'], [L.empty, 'ligne vide', 'lignes vides'],
+      [L.repeatHeader, 'en-tête répété', 'en-têtes répétés'], [L.footer, 'note de bas de page', 'notes de bas de page']]
+      .filter(([n]) => n).map(([n, one, many]) => plural(n, one, many)).join(', ') || 'Aucune ligne retirée';
     $('#kpis').innerHTML = [
       ['', nf.format(r.meta.outputRows), 'Lignes propres', `sur ${nf.format(r.meta.inputRows)} lues`],
       ['k-fix', `<span>${nf.format(r.meta.cellsFixed)}</span>`, 'Cellules corrigées', `${pct(r.meta.cellsFixed, r.meta.cellsTotal)} % du tableau`],
-      ['', nf.format(L.dups + L.empty + L.totals + L.repeatHeader + L.footer), 'Lignes retirées', `${plural(L.dups, 'doublon', 'doublons')}, ${plural(L.totals, 'total', 'totaux')}, ${plural(L.empty, 'vide', 'vides')}`],
+      ['', nf.format(r.meta.removedRows), 'Lignes retirées', removed],
       ['k-warn' + (attention ? '' : ' zero'), nf.format(attention), 'À vérifier', attention ? 'Valeurs signalées ou illisibles' : 'Aucune valeur douteuse'],
     ].map(([cls, v, label, sub]) => `<div class="kpi ${cls}"><span class="eyebrow">${label}</span><span class="v">${v}</span><span class="s">${esc(sub)}</span></div>`).join('');
   }
@@ -306,7 +315,9 @@
   }
 
   function timeChart(rows, ti, val, fmt, mlabel) {
-    const ds = rows.map((r) => r.cells[ti].v).filter(Boolean).sort();
+    // Les graphiques regroupent par jour sans modifier les horodatages des données.
+    const dayOf = (s) => typeof s === 'string' && /^\d{4}-\d{2}-\d{2}(?:T|$)/.test(s) ? s.slice(0, 10) : null;
+    const ds = rows.map((r) => dayOf(r.cells[ti].v)).filter(Boolean).sort();
     if (!ds.length) return '';
     const toD = (s) => new Date(s + 'T00:00:00Z');
     const span = (toD(ds[ds.length - 1]) - toD(ds[0])) / 86400000;
@@ -327,7 +338,7 @@
       return d.toISOString().slice(0, 10);
     };
     const agg = new Map();
-    for (const r of rows) { const v = r.cells[ti].v; if (v) { const k = keyOf(v); agg.set(k, (agg.get(k) || 0) + val(r)); } }
+    for (const r of rows) { const v = dayOf(r.cells[ti].v); if (v) { const k = keyOf(v); agg.set(k, (agg.get(k) || 0) + val(r)); } }
     const buckets = [];
     for (let k = keyOf(ds[0]), end = keyOf(ds[ds.length - 1]); k <= end && buckets.length < 400; k = step(k)) buckets.push([k, agg.get(k) || 0]);
     const max = Math.max(...buckets.map((b) => b[1]), 0);
@@ -403,9 +414,17 @@
   function bind() {
     $('#fileInput').addEventListener('change', (e) => { addFiles(e.target.files); e.target.value = ''; });
     $('#demoBtn').addEventListener('click', loadSample);
+    $('#heroDemoBtn')?.addEventListener('click', loadSample);
     $('#resetBtn').addEventListener('click', reset);
     $('#dlXlsx').addEventListener('click', downloadXlsx);
     $('#dlCsv').addEventListener('click', downloadCsv);
+
+    const settings = $('.settings-disclosure');
+    if (settings) {
+      const narrow = window.matchMedia('(max-width: 1000px)');
+      settings.open = !narrow.matches;
+      narrow.addEventListener('change', (e) => { settings.open = !e.matches; });
+    }
 
     for (const k of Object.keys(state.options)) {
       const el = document.getElementById('opt-' + k);
