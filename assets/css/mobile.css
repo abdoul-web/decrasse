@@ -52,8 +52,8 @@
 }
 
 @media (max-width: 720px) {
-  html { scroll-padding-top: 84px; }
-  body { font-size: 16px; }
+  html { scroll-padding-top: calc(84px + env(safe-area-inset-top)); }
+  body { font-size: 16px; padding-top: env(safe-area-inset-top); }
   .gutter { padding-left: max(16px, env(safe-area-inset-left)); padding-right: max(16px, env(safe-area-inset-right)); }
   .site-header .container { height: 64px; gap: 10px; }
   .logo { font-size: 23px; gap: 8px; }
@@ -152,7 +152,7 @@
   .field select, .colrow input[type="text"], .colrow select, .toolbar input[type="search"], .toolbar select, #changeFilter, .chart-controls select { font-size: 16px; min-height: 46px; }
   ol.journal li { font-size: 13px; }
   .results { padding: 0 12px 15px; border-radius: 15px; }
-  .tabs { position: sticky; top: 64px; z-index: 12; padding: 0; background: var(--surface); overflow-x: auto; scrollbar-width: thin; }
+  .tabs { position: sticky; top: calc(64px + env(safe-area-inset-top)); z-index: 12; padding: 0; background: var(--surface); overflow-x: auto; scrollbar-width: thin; }
   .tabs button { min-height: 54px; padding: 13px 8px; font-size: 12px; gap: 5px; }
   .tabs .n { font-size: 10px; padding-inline: 4px; }
   .toolbar .left { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; }
@@ -161,7 +161,7 @@
   .mobile-view { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; padding: 4px; border-radius: 10px; background: var(--surface-2); }
   .mobile-view button { min-height: 44px; border: 0; border-radius: 7px; background: transparent; color: var(--muted); font: 500 14px var(--f-body); cursor: pointer; }
   .mobile-view button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
-  #previewCardsNav { scroll-margin-top: 132px; }
+  #previewCardsNav { scroll-margin-top: calc(132px + env(safe-area-inset-top)); }
   .record-hint { font-size: 12px; line-height: 1.6; color: var(--muted); }
   #panel-preview[data-view="cards"] .record-hint { display: block; }
   .legend { font-size: 11px; line-height: 1.6; gap: 8px 12px; }
