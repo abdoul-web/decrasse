@@ -14,7 +14,7 @@
     options: { dedupe: true, unifySpelling: true, dropTotals: true, dropEmptyColumns: true, sortByDate: false, addSource: true, skipTitleRows: true },
     overrides: {},
     result: null,
-    ui: { tab: 'preview', search: '', filter: 'all', changeFilter: 'all', dateFormat: 'iso', csv: 'std', ch: {} },
+    ui: { tab: 'preview', search: '', filter: 'all', changeFilter: 'all', dateFormat: 'iso', csv: 'std', previewView: 'cards', cardPage: 0, ch: {} },
   };
   let seq = 0;
 
@@ -88,7 +88,10 @@
 
   function reset() {
     state.files = []; state.overrides = {}; state.result = null; state.ui.ch = {};
+    state.ui.cardPage = 0;
     $('#search').value = ''; state.ui.search = '';
+    $('#rowFilter').value = 'all'; state.ui.filter = 'all'; state.ui.changeFilter = 'all';
+    setTab('preview');
     show(false);
     window.scrollTo({ top: 0 });
     if (location.hash) history.replaceState(null, '', location.pathname + location.search);
@@ -208,12 +211,49 @@
       if (q && !row.cells.some((c, ci) => c.v != null && E.norm(show_(cols[ci], c.v)).includes(q))) continue;
       matches.push(i);
     }
-    const lim = D.config.previewRows;
-    const shown = matches.slice(0, lim);
-    $('#previewCount').textContent = matches.length > lim
-      ? `${nf.format(lim)} premières lignes sur ${nf.format(matches.length)} · le fichier téléchargé contient tout`
-      : plural(matches.length, 'ligne', 'lignes');
-    if (!shown.length) { $('#previewTable').innerHTML = `<tbody><tr><td class="empty-state">${q || f !== 'all' ? 'Aucune ligne ne correspond.' : 'Aucune donnée.'}</td></tr></tbody>`; return; }
+    const asCards = window.matchMedia('(max-width: 720px)').matches && state.ui.previewView !== 'table';
+    const lim = asCards ? 5 : D.config.previewRows;
+    const pages = Math.max(1, Math.ceil(matches.length / lim));
+    state.ui.cardPage = Math.min(state.ui.cardPage, pages - 1);
+    const start = asCards ? state.ui.cardPage * lim : 0;
+    const shown = matches.slice(start, start + lim);
+    $('#panel-preview').dataset.view = asCards ? 'cards' : 'table';
+    $('#previewCards').hidden = !asCards;
+    $('#previewTable').closest('.table-wrap').hidden = asCards;
+    $('#previewCardsNav').hidden = !asCards || matches.length <= lim;
+    $('#cardsPrev').disabled = state.ui.cardPage === 0;
+    $('#cardsNext').disabled = state.ui.cardPage >= pages - 1;
+    $('#cardsPage').textContent = `${state.ui.cardPage + 1} / ${pages}`;
+    for (const button of document.querySelectorAll('[data-preview-view]')) {
+      button.setAttribute('aria-pressed', String(button.dataset.previewView === state.ui.previewView));
+    }
+    $('#previewCount').textContent = asCards && matches.length > lim
+      ? `${nf.format(start + 1)}–${nf.format(start + shown.length)} sur ${nf.format(matches.length)} · export complet`
+      : matches.length > lim
+        ? `${nf.format(lim)} premières lignes sur ${nf.format(matches.length)} · le fichier téléchargé contient tout`
+        : plural(matches.length, 'ligne', 'lignes');
+    $('#previewCards').innerHTML = '';
+    if (!shown.length) {
+      const message = q || f !== 'all' ? 'Aucune ligne ne correspond.' : 'Aucune donnée.';
+      $('#previewTable').innerHTML = `<tbody><tr><td class="empty-state">${message}</td></tr></tbody>`;
+      if (asCards) $('#previewCards').innerHTML = `<p class="empty-state">${message}</p>`;
+      return;
+    }
+    if (asCards) {
+      $('#previewTable').innerHTML = '';
+      $('#previewCards').innerHTML = shown.map((i) => {
+        const row = r.rows[i];
+        const annotated = row.cells.map((cell, ci) => ({ cell, col: cols[ci] })).filter(({ cell }) => cell.fix);
+        const fields = row.cells.map((c, ci) => {
+          const st = c.status === 'removed' ? 'bad' : c.status === 'warn' ? 'warn' : c.fix ? 'fx' : c.v == null ? 'nul' : '';
+          const txt = c.v == null ? (c.status === 'removed' ? E.rawDisplay(c.o) : '(vide)') : show_(cols[ci], c.v);
+          return `<div><dt>${esc(cols[ci].label)}</dt><dd class="${st}">${esc(txt)}</dd></div>`;
+        }).join('');
+        const history = annotated.length ? `<details class="record-history"><summary>Détails et valeurs d’origine</summary><ul>${annotated.map(({ cell: c, col }) => `<li><strong>${esc(col.label)}</strong><span>${esc(c.fix)}</span><del><span class="visually-hidden">Avant : </span>${esc(E.rawDisplay(c.o) || '(vide)')}</del><ins><span class="visually-hidden">Après : </span>${esc(c.v == null ? '(vide)' : show_(col, c.v))}</ins></li>`).join('')}</ul></details>` : '';
+        return `<article class="record-card" aria-label="Ligne ${i + 2}"><header><strong>Ligne ${i + 2}</strong><span>${annotated.length ? plural(annotated.length, 'valeur annotée', 'valeurs annotées') : plural(cols.length, 'colonne', 'colonnes')}</span></header><dl>${fields}</dl>${history}</article>`;
+      }).join('');
+      return;
+    }
     let h = `<thead><tr><th class="rn" scope="col">Ligne</th>${cols.map((c) => `<th scope="col" class="${cellClass(c) === 'num' ? 'num' : ''}">${esc(c.label)}${E.TYPE_LABEL[c.type] !== c.label ? `<span class="t">${E.TYPE_LABEL[c.type]}</span>` : ''}</th>`).join('')}</tr></thead><tbody>`;
     for (const i of shown) {
       const row = r.rows[i];
@@ -419,6 +459,25 @@
     $('#dlXlsx').addEventListener('click', downloadXlsx);
     $('#dlCsv').addEventListener('click', downloadCsv);
 
+    const mobile = window.matchMedia('(max-width: 720px)');
+    const placeMobileControls = () => {
+      const format = $('#csvFormat');
+      if (mobile.matches) $('#csvFormatMobile').append(format);
+      else $('#csvFormatHome').after(format);
+      if (state.result && state.ui.tab === 'preview') renderPreview();
+    };
+    placeMobileControls();
+    mobile.addEventListener('change', placeMobileControls);
+    for (const button of document.querySelectorAll('[data-preview-view]')) {
+      button.addEventListener('click', () => {
+        state.ui.previewView = button.dataset.previewView;
+        state.ui.cardPage = 0;
+        renderPreview();
+      });
+    }
+    $('#cardsPrev').addEventListener('click', () => { state.ui.cardPage = Math.max(0, state.ui.cardPage - 1); renderPreview(); });
+    $('#cardsNext').addEventListener('click', () => { state.ui.cardPage++; renderPreview(); });
+
     const settings = $('.settings-disclosure');
     if (settings) {
       const narrow = window.matchMedia('(max-width: 1000px)');
@@ -457,8 +516,8 @@
     });
 
     let st;
-    $('#search').addEventListener('input', (e) => { clearTimeout(st); st = setTimeout(() => { state.ui.search = e.target.value; renderPreview(); }, 150); });
-    $('#rowFilter').addEventListener('change', (e) => { state.ui.filter = e.target.value; renderPreview(); });
+    $('#search').addEventListener('input', (e) => { clearTimeout(st); st = setTimeout(() => { state.ui.search = e.target.value; state.ui.cardPage = 0; renderPreview(); }, 150); });
+    $('#rowFilter').addEventListener('change', (e) => { state.ui.filter = e.target.value; state.ui.cardPage = 0; renderPreview(); });
     $('#changeFilter').addEventListener('change', (e) => { state.ui.changeFilter = e.target.value; renderChanges(); });
 
     const grid = $('#colGrid');
